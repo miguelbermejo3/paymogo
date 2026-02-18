@@ -6,7 +6,9 @@ import {
   getDocs,
   doc,
   getDoc,
+  addDoc,
   setDoc,
+  updateDoc,
   runTransaction,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -34,6 +36,7 @@ const state = {
   userVotes: [],
   dayVotes: [],
   bbqVotes: [],
+  packingItems: [],
   users: [],
   userId: "",
   userName: "",
@@ -135,6 +138,7 @@ function detectPage() {
   if (qs("#bedsGrid")) return "elegir";
   if (qs("#daysOptions")) return "dias";
   if (qs("#bbqForm")) return "barbacoa";
+  if (qs("#packingForm")) return "maleta";
   if (qs("#summary")) return "resumen";
   if (qs("#bedsPreview")) return "index";
   return "unknown";
@@ -454,6 +458,34 @@ async function fetchAllBbqVotes() {
   } catch (err) {
     toast(`No se pudieron leer votos de barbacoa: ${parseError(err)}`, "error", 3600);
     console.error("BBQ votes read error", err);
+    return [];
+  }
+}
+
+async function fetchPackingItems() {
+  try {
+    const snap = await getDocs(collection(db, "packingItems"));
+    return snap.docs
+      .map((d) => {
+        const data = d.data() || {};
+        return {
+          id: d.id,
+          itemName: String(data.itemName || "").trim(),
+          notes: String(data.notes || "").trim(),
+          assignedUserId: String(data.assignedUserId || ""),
+          assignedUserName: String(data.assignedUserName || ""),
+          addedByUserId: String(data.addedByUserId || ""),
+          addedByUserName: String(data.addedByUserName || ""),
+          status: String(data.status || "pendiente"),
+        };
+      })
+      .sort((a, b) => {
+        if (a.status !== b.status) return a.status === "pendiente" ? -1 : 1;
+        return a.itemName.localeCompare(b.itemName, "es");
+      });
+  } catch (err) {
+    toast(`No se pudo cargar maleta comunitaria: ${parseError(err)}`, "error", 3600);
+    console.error("Packing items read error", err);
     return [];
   }
 }
@@ -867,6 +899,43 @@ function renderBbqPage() {
   }
 }
 
+function renderPackingPage() {
+  const form = qs("#packingForm");
+  const list = qs("#packingList");
+  if (!form || !list) return;
+
+  const assignSelect = qs("#packingAssignedUser", form);
+  if (assignSelect && !assignSelect.dataset.filled) {
+    assignSelect.innerHTML = state.users
+      .map((u) => `<option value="${escapeHtml(u.id)}">${escapeHtml(u.displayName)}</option>`)
+      .join("");
+    assignSelect.dataset.filled = "true";
+  }
+
+  list.innerHTML = "";
+  if (!state.packingItems.length) {
+    list.innerHTML = "<li class=\"meta\">Todavía no hay cosas añadidas.</li>";
+    return;
+  }
+
+  state.packingItems.forEach((item) => {
+    const li = document.createElement("li");
+    li.className = "summary-row";
+    const done = item.status === "listo";
+    li.innerHTML = `
+      <span class="name">${escapeHtml(item.itemName)}</span>
+      <span class="meta">Lo lleva: ${escapeHtml(item.assignedUserName || item.assignedUserId || "-")}</span>
+      ${item.notes ? `<span class="meta">Nota: ${escapeHtml(item.notes)}</span>` : ""}
+      <span class="${done ? "badge" : "badge--warning"}">${done ? "LISTO" : "PENDIENTE"}</span>
+      <span class="meta">Añadido por: ${escapeHtml(item.addedByUserName || item.addedByUserId || "-")}</span>
+      <button class="btn ghost toggle-pack-btn" type="button" data-pack-id="${escapeHtml(item.id)}" data-next-status="${done ? "pendiente" : "listo"}">
+        ${done ? "Marcar pendiente" : "Marcar listo"}
+      </button>
+    `;
+    list.appendChild(li);
+  });
+}
+
 async function voteForBed(bedId) {
   if (voteInFlight) return;
   if (!state.userId) {
@@ -1042,6 +1111,75 @@ async function saveBbqVoteFromForm() {
   }
 }
 
+async function savePackingItemFromForm() {
+  const form = qs("#packingForm");
+  if (!form) return;
+  if (!state.userId) {
+    toast("Primero identifícate con tu usuario.", "info");
+    return;
+  }
+
+  const fd = new FormData(form);
+  const itemName = String(fd.get("itemName") || "").trim();
+  const assignedUserId = String(fd.get("assignedUserId") || "").trim();
+  const notes = String(fd.get("notes") || "").trim();
+  const assignedUser = state.users.find((u) => u.id === assignedUserId);
+
+  if (!itemName) {
+    toast("Escribe qué hay que llevar.", "info");
+    return;
+  }
+  if (!assignedUserId || !assignedUser) {
+    toast("Selecciona a quién se asigna.", "info");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await addDoc(collection(db, "packingItems"), {
+      itemName,
+      notes,
+      assignedUserId,
+      assignedUserName: assignedUser.displayName || assignedUser.id,
+      addedByUserId: state.userId,
+      addedByUserName: state.userName,
+      status: "pendiente",
+      createdAt: serverTimestamp(),
+      ...(state.group ? { group: state.group } : {}),
+    });
+
+    form.reset();
+    const sel = qs("#packingAssignedUser", form);
+    if (sel && state.users.length) sel.value = state.users[0].id;
+    toast("Item añadido a la maleta comunitaria.", "success");
+    await refreshData();
+    renderCurrentPage();
+  } catch (err) {
+    toast(`No se pudo guardar: ${parseError(err)}`, "error", 3800);
+    console.error("Packing create error", err);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function updatePackingItemStatus(itemId, nextStatus) {
+  if (!itemId || !nextStatus) return;
+  setLoading(true);
+  try {
+    await updateDoc(doc(db, "packingItems", itemId), {
+      status: nextStatus,
+      updatedAt: serverTimestamp(),
+    });
+    await refreshData();
+    renderCurrentPage();
+  } catch (err) {
+    toast(`No se pudo actualizar estado: ${parseError(err)}`, "error", 3800);
+    console.error("Packing update error", err);
+  } finally {
+    setLoading(false);
+  }
+}
+
 function wireChooseEvents() {
   const grid = qs("#bedsGrid");
   if (!grid) return;
@@ -1092,6 +1230,26 @@ function wireBbqEvents() {
   });
 }
 
+function wirePackingEvents() {
+  const form = qs("#packingForm");
+  const list = qs("#packingList");
+  if (form) {
+    on(form, "submit", async (e) => {
+      e.preventDefault();
+      await savePackingItemFromForm();
+    });
+  }
+  if (list) {
+    on(list, "click", async (e) => {
+      const btn = e.target.closest(".toggle-pack-btn");
+      if (!btn) return;
+      const itemId = btn.dataset.packId;
+      const nextStatus = btn.dataset.nextStatus;
+      await updatePackingItemStatus(itemId, nextStatus);
+    });
+  }
+}
+
 function wireGeneralEffects() {
   on(document, "mouseover", (e) => {
     const target = e.target.closest("a, button, .card");
@@ -1125,7 +1283,7 @@ async function handleAdminReset() {
 }
 
 async function refreshData() {
-  const [beds, myVote, userVotes, myDayVote, dayVotes, myBbqVote, bbqVotes] = await Promise.all([
+  const [beds, myVote, userVotes, myDayVote, dayVotes, myBbqVote, bbqVotes, packingItems] = await Promise.all([
     fetchBeds(),
     fetchMyVote(),
     fetchAllUserVotes(),
@@ -1133,6 +1291,7 @@ async function refreshData() {
     fetchAllDayVotes(),
     fetchMyBbqVote(),
     fetchAllBbqVotes(),
+    fetchPackingItems(),
   ]);
   state.beds = beds;
   state.myVote = myVote;
@@ -1141,6 +1300,7 @@ async function refreshData() {
   state.dayVotes = dayVotes;
   state.myBbqVote = myBbqVote;
   state.bbqVotes = bbqVotes;
+  state.packingItems = packingItems;
 }
 
 function renderCurrentPage() {
@@ -1166,6 +1326,8 @@ function renderCurrentPage() {
     renderDaysPage();
   } else if (state.page === "barbacoa") {
     renderBbqPage();
+  } else if (state.page === "maleta") {
+    renderPackingPage();
   } else if (state.page === "resumen") {
     renderSummary();
   }
@@ -1186,6 +1348,7 @@ async function bootstrap() {
     wireChooseEvents();
     wireDaysEvents();
     wireBbqEvents();
+    wirePackingEvents();
     await handleAdminReset();
   } catch (err) {
     console.error("Bootstrap error", err);

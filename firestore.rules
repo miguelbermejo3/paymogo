@@ -126,5 +126,37 @@ service cloud.firestore {
           "group",
         ]);
     }
+
+    match /packingItems/{itemId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create: if isSignedIn() &&
+        request.resource.data.itemName is string &&
+        request.resource.data.itemName.size() > 0 &&
+        request.resource.data.notes is string &&
+        request.resource.data.assignedUserId is string &&
+        request.resource.data.assignedUserId.size() > 0 &&
+        request.resource.data.assignedUserName is string &&
+        request.resource.data.addedByUserId is string &&
+        request.resource.data.addedByUserId.size() > 0 &&
+        request.resource.data.addedByUserName is string &&
+        request.resource.data.status == "pendiente" &&
+        request.resource.data.keys().hasOnly([
+          "itemName",
+          "notes",
+          "assignedUserId",
+          "assignedUserName",
+          "addedByUserId",
+          "addedByUserName",
+          "status",
+          "createdAt",
+          "group",
+        ]);
+
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(["status", "updatedAt"]) &&
+        request.resource.data.status in ["pendiente", "listo"];
+    }
   }
 }
