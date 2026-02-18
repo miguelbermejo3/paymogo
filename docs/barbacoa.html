@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Barbacoa sábado</title>
+    <link rel="stylesheet" href="./style.css?v=20260221" />
+  </head>
+  <body>
+    <div class="bg-blobs" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="blob blob-c"></span>
+    </div>
+
+    <div class="wrap" id="app">
+      <header class="hero glass">
+        <div class="hero__top">
+          <p class="eyebrow">Comida del sábado</p>
+          <h1>Votación barbacoa 🍖</h1>
+          <p class="subtitle">Confirma asistencia, comida/bebida y peticiones especiales.</p>
+        </div>
+        <nav class="nav">
+          <a class="nav__link" href="./index.html">Home</a>
+          <a class="nav__link" href="./elegir.html">Votación de camas</a>
+          <a class="nav__link" href="./dias.html">Votación de días</a>
+          <a class="nav__link" href="./resumen.html">Resumen</a>
+        </nav>
+
+        <div class="hero__meta">
+          <div id="routeContext" class="pill" data-group="">
+            <small>Contexto URL listo para app.js</small>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="card glass">
+          <h2>Tu respuesta</h2>
+          <p id="myBbqStatus">Aún no has respondido la votación de barbacoa.</p>
+
+          <form id="bbqForm" class="bbq-form">
+            <div class="form-grid">
+              <fieldset class="card glass">
+                <legend>¿Vas a la barbacoa del sábado?</legend>
+                <label><input type="radio" name="asiste" value="si" /> Sí</label>
+                <label><input type="radio" name="asiste" value="no" /> No</label>
+              </fieldset>
+
+              <fieldset class="card glass">
+                <legend>¿Contamos contigo para comida?</legend>
+                <label><input type="radio" name="cuentaComida" value="si" /> Sí</label>
+                <label><input type="radio" name="cuentaComida" value="no" /> No</label>
+              </fieldset>
+
+              <fieldset class="card glass">
+                <legend>¿Contamos contigo para bebida?</legend>
+                <label><input type="radio" name="cuentaBebida" value="si" /> Sí</label>
+                <label><input type="radio" name="cuentaBebida" value="no" /> No</label>
+              </fieldset>
+            </div>
+
+            <div class="form-grid">
+              <label class="card glass">Petición de comida
+                <textarea id="peticionComida" name="peticionComida" rows="2" placeholder="Ej: quiero carne poco hecha"></textarea>
+              </label>
+
+              <label class="card glass">Petición de bebida
+                <textarea id="peticionBebida" name="peticionBebida" rows="2" placeholder="Ej: cerveza sin alcohol"></textarea>
+              </label>
+
+              <label class="card glass">Algo que no quieras
+                <textarea id="noQuiere" name="noQuiere" rows="2" placeholder="Ej: no marisco"></textarea>
+              </label>
+            </div>
+
+            <label class="card glass">Notas extra
+              <textarea id="bbqNotas" name="bbqNotas" rows="2" placeholder="Alergias, detalles... "></textarea>
+            </label>
+
+            <div class="actions">
+              <button class="btn btn--primary" type="submit">Guardar respuesta</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card glass">
+          <h2>Resumen del grupo</h2>
+          <div id="bbqTotals" class="legend">
+            <span class="badge">0 asistentes</span>
+            <span class="badge">0 para comida</span>
+            <span class="badge">0 para bebida</span>
+          </div>
+          <ul id="bbqRequests" class="grid"></ul>
+        </section>
+      </main>
+
+      <footer class="footer foot">
+        <p>Que no falte carbón, hielo y paz ✌️</p>
+      </footer>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script type="module" src="./app.js?v=20260221"></script>
+  </body>
+</html>
+

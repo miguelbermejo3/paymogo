@@ -750,6 +750,58 @@ button:focus-visible,
   line-height: 1.5;
 }
 
+.bbq-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 1fr;
+}
+
+.bbq-form fieldset {
+  margin: 0;
+  padding: 0.85rem;
+}
+
+.bbq-form legend {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.bbq-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: #eef2ff;
+}
+
+.bbq-form input[type="radio"] {
+  margin-right: 0.35rem;
+}
+
+.bbq-form textarea {
+  width: 100%;
+  border: 1px solid rgba(173, 213, 255, 0.4);
+  background: rgba(18, 25, 52, 0.58);
+  color: #eef3ff;
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.bbq-form textarea::placeholder {
+  color: rgba(222, 232, 255, 0.55);
+}
+
+@media (min-width: 768px) {
+  .form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (min-width: 768px) {
   .home-menu {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -6,6 +6,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  setDoc,
   runTransaction,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -29,8 +30,10 @@ const state = {
   beds: [],
   myVote: null,
   myDayVote: null,
+  myBbqVote: null,
   userVotes: [],
   dayVotes: [],
+  bbqVotes: [],
   users: [],
   userId: "",
   userName: "",
@@ -131,6 +134,7 @@ function tapFx() {
 function detectPage() {
   if (qs("#bedsGrid")) return "elegir";
   if (qs("#daysOptions")) return "dias";
+  if (qs("#bbqForm")) return "barbacoa";
   if (qs("#summary")) return "resumen";
   if (qs("#bedsPreview")) return "index";
   return "unknown";
@@ -412,6 +416,44 @@ async function fetchAllDayVotes() {
   } catch (err) {
     toast(`No se pudieron leer votos de días: ${parseError(err)}`, "error", 3600);
     console.error("Day votes read error", err);
+    return [];
+  }
+}
+
+async function fetchMyBbqVote() {
+  if (!state.userId) return null;
+  try {
+    const snap = await getDoc(doc(db, "bbqVotes", state.userId));
+    if (!snap.exists()) return null;
+    return snap.data() || null;
+  } catch (err) {
+    toast(`No se pudo leer tu voto de barbacoa: ${parseError(err)}`, "error", 3600);
+    console.error("BBQ vote read error", err);
+    return null;
+  }
+}
+
+async function fetchAllBbqVotes() {
+  try {
+    const snap = await getDocs(collection(db, "bbqVotes"));
+    return snap.docs.map((d) => {
+      const data = d.data() || {};
+      return {
+        id: d.id,
+        userId: String(data.userId || d.id),
+        userName: String(data.userName || data.userId || d.id),
+        asiste: !!data.asiste,
+        cuentaComida: !!data.cuentaComida,
+        cuentaBebida: !!data.cuentaBebida,
+        peticionComida: String(data.peticionComida || ""),
+        peticionBebida: String(data.peticionBebida || ""),
+        noQuiere: String(data.noQuiere || ""),
+        notas: String(data.notas || ""),
+      };
+    });
+  } catch (err) {
+    toast(`No se pudieron leer votos de barbacoa: ${parseError(err)}`, "error", 3600);
+    console.error("BBQ votes read error", err);
     return [];
   }
 }
@@ -754,6 +796,77 @@ function renderDaysPage() {
   });
 }
 
+function renderBbqPage() {
+  const form = qs("#bbqForm");
+  if (!form) return;
+
+  const my = state.myBbqVote || null;
+  if (my) {
+    const asiste = my.asiste ? "si" : "no";
+    const comida = my.cuentaComida ? "si" : "no";
+    const bebida = my.cuentaBebida ? "si" : "no";
+    const checkRadio = (name, val) => {
+      const input = qs(`input[name="${name}"][value="${val}"]`, form);
+      if (input) input.checked = true;
+    };
+    checkRadio("asiste", asiste);
+    checkRadio("cuentaComida", comida);
+    checkRadio("cuentaBebida", bebida);
+    const setValue = (id, v) => {
+      const el = qs(`#${id}`, form);
+      if (el && document.activeElement !== el) el.value = v || "";
+    };
+    setValue("peticionComida", my.peticionComida);
+    setValue("peticionBebida", my.peticionBebida);
+    setValue("noQuiere", my.noQuiere);
+    setValue("bbqNotas", my.notas);
+  }
+
+  const myStatus = qs("#myBbqStatus");
+  if (myStatus) {
+    myStatus.textContent = my
+      ? "Tu respuesta está guardada. Puedes actualizarla."
+      : "Aún no has respondido la votación de barbacoa.";
+  }
+
+  const attending = state.bbqVotes.filter((v) => v.asiste);
+  const comida = attending.filter((v) => v.cuentaComida).length;
+  const bebida = attending.filter((v) => v.cuentaBebida).length;
+
+  const totals = qs("#bbqTotals");
+  if (totals) {
+    totals.innerHTML = `
+      <span class="badge">${attending.length} asistentes</span>
+      <span class="badge">${comida} para comida</span>
+      <span class="badge">${bebida} para bebida</span>
+    `;
+  }
+
+  const requestList = qs("#bbqRequests");
+  if (requestList) {
+    requestList.innerHTML = "";
+    const withData = state.bbqVotes.filter((v) =>
+      v.peticionComida || v.peticionBebida || v.noQuiere || v.notas
+    );
+    if (!withData.length) {
+      requestList.innerHTML = "<li class=\"meta\">Sin peticiones todavía.</li>";
+    } else {
+      withData.forEach((v) => {
+        const li = document.createElement("li");
+        li.className = "summary-row";
+        li.innerHTML = `
+          <span class="name">${escapeHtml(v.userName)}</span>
+          ${v.peticionComida ? `<span class="meta">Comida: ${escapeHtml(v.peticionComida)}</span>` : ""}
+          ${v.peticionBebida ? `<span class="meta">Bebida: ${escapeHtml(v.peticionBebida)}</span>` : ""}
+          ${v.noQuiere ? `<span class="meta">No quiere: ${escapeHtml(v.noQuiere)}</span>` : ""}
+          ${v.notas ? `<span class="meta">Notas: ${escapeHtml(v.notas)}</span>` : ""}
+        `;
+        requestList.appendChild(li);
+      });
+    }
+  }
+}
+
 async function voteForBed(bedId) {
   if (voteInFlight) return;
   if (!state.userId) {
@@ -882,6 +995,53 @@ async function voteForDay(optionId) {
   }
 }
 
+async function saveBbqVoteFromForm() {
+  const form = qs("#bbqForm");
+  if (!form) return;
+  if (!state.userId) {
+    toast("Primero identifícate con tu usuario.", "info");
+    return;
+  }
+
+  const fd = new FormData(form);
+  const asiste = fd.get("asiste") === "si";
+  if (!fd.get("asiste")) {
+    toast("Indica si asistes o no a la barbacoa.", "info");
+    return;
+  }
+  const cuentaComida = asiste ? fd.get("cuentaComida") === "si" : false;
+  const cuentaBebida = asiste ? fd.get("cuentaBebida") === "si" : false;
+
+  const payload = {
+    uid: state.uid || "",
+    userId: state.userId,
+    userName: state.userName,
+    asiste,
+    cuentaComida,
+    cuentaBebida,
+    peticionComida: String(fd.get("peticionComida") || "").trim(),
+    peticionBebida: String(fd.get("peticionBebida") || "").trim(),
+    noQuiere: String(fd.get("noQuiere") || "").trim(),
+    notas: String(fd.get("bbqNotas") || "").trim(),
+    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
+    ...(state.group ? { group: state.group } : {}),
+  };
+
+  setLoading(true);
+  try {
+    await setDoc(doc(db, "bbqVotes", state.userId), payload, { merge: true });
+    toast("Respuesta de barbacoa guardada.", "success");
+    await refreshData();
+    renderCurrentPage();
+  } catch (err) {
+    toast(`No se pudo guardar: ${parseError(err)}`, "error", 3800);
+    console.error("BBQ save error", err);
+  } finally {
+    setLoading(false);
+  }
+}
+
 function wireChooseEvents() {
   const grid = qs("#bedsGrid");
   if (!grid) return;
@@ -923,6 +1083,15 @@ function wireDaysEvents() {
   });
 }
 
+function wireBbqEvents() {
+  const form = qs("#bbqForm");
+  if (!form) return;
+  on(form, "submit", async (e) => {
+    e.preventDefault();
+    await saveBbqVoteFromForm();
+  });
+}
+
 function wireGeneralEffects() {
   on(document, "mouseover", (e) => {
     const target = e.target.closest("a, button, .card");
@@ -956,18 +1125,22 @@ async function handleAdminReset() {
 }
 
 async function refreshData() {
-  const [beds, myVote, userVotes, myDayVote, dayVotes] = await Promise.all([
+  const [beds, myVote, userVotes, myDayVote, dayVotes, myBbqVote, bbqVotes] = await Promise.all([
     fetchBeds(),
     fetchMyVote(),
     fetchAllUserVotes(),
     fetchMyDayVote(),
     fetchAllDayVotes(),
+    fetchMyBbqVote(),
+    fetchAllBbqVotes(),
   ]);
   state.beds = beds;
   state.myVote = myVote;
   state.userVotes = userVotes;
   state.myDayVote = myDayVote;
   state.dayVotes = dayVotes;
+  state.myBbqVote = myBbqVote;
+  state.bbqVotes = bbqVotes;
 }
 
 function renderCurrentPage() {
@@ -991,6 +1164,8 @@ function renderCurrentPage() {
     renderChooseGrid();
   } else if (state.page === "dias") {
     renderDaysPage();
+  } else if (state.page === "barbacoa") {
+    renderBbqPage();
   } else if (state.page === "resumen") {
     renderSummary();
   }
@@ -1010,6 +1185,7 @@ async function bootstrap() {
     renderCurrentPage();
     wireChooseEvents();
     wireDaysEvents();
+    wireBbqEvents();
     await handleAdminReset();
   } catch (err) {
     console.error("Bootstrap error", err);

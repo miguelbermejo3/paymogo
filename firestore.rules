@@ -94,5 +94,37 @@ service cloud.firestore {
           "group",
         ]);
     }
+
+    match /bbqVotes/{userId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create, update: if isSignedIn() &&
+        request.auth.uid == request.resource.data.uid &&
+        request.resource.data.userId == userId &&
+        request.resource.data.userName is string &&
+        request.resource.data.asiste is bool &&
+        request.resource.data.cuentaComida is bool &&
+        request.resource.data.cuentaBebida is bool &&
+        request.resource.data.peticionComida is string &&
+        request.resource.data.peticionBebida is string &&
+        request.resource.data.noQuiere is string &&
+        request.resource.data.notas is string &&
+        request.resource.data.keys().hasOnly([
+          "uid",
+          "userId",
+          "userName",
+          "asiste",
+          "cuentaComida",
+          "cuentaBebida",
+          "peticionComida",
+          "peticionBebida",
+          "noQuiere",
+          "notas",
+          "createdAt",
+          "updatedAt",
+          "group",
+        ]);
+    }
   }
 }
