@@ -6,11 +6,9 @@ import {
   getDocs,
   doc,
   getDoc,
+  runTransaction,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import {
-  getFunctions,
-  httpsCallable,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyDZTTTEoMlvBS603PbJQZUbw50jHijQWS8",
@@ -24,7 +22,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const functions = getFunctions(app);
 
 const params = new URLSearchParams(window.location.search);
 const state = {
@@ -450,11 +447,36 @@ async function voteForBed(bedId) {
   tapFx();
 
   try {
-    const voteFn = httpsCallable(functions, "voteForBed");
-    const payload = { bedId };
-    if (state.group) payload.group = state.group;
+    if (!state.uid) {
+      throw new Error("No autenticado.");
+    }
 
-    await voteFn(payload);
+    const voteRef = doc(db, "votes", state.uid);
+    const bedRef = doc(db, "beds", bedId);
+
+    await runTransaction(db, async (tx) => {
+      const [voteSnap, bedSnap] = await Promise.all([
+        tx.get(voteRef),
+        tx.get(bedRef),
+      ]);
+
+      if (voteSnap.exists()) throw new Error("Ya votaste.");
+      if (!bedSnap.exists()) throw new Error("La cama no existe.");
+
+      const bed = bedSnap.data() || {};
+      const capacity = Math.max(0, Number(bed.capacity) || 0);
+      const taken = Math.max(0, Number(bed.taken) || 0);
+
+      if (taken >= capacity) throw new Error("Esa cama ya está llena.");
+
+      tx.update(bedRef, { taken: taken + 1 });
+      tx.set(voteRef, {
+        uid: state.uid,
+        bedId,
+        createdAt: serverTimestamp(),
+        ...(state.group ? { group: state.group } : {}),
+      });
+    });
 
     confettiBoom();
     toast("Voto registrado. Perfecto!", "success");
@@ -521,23 +543,7 @@ async function handleAdminReset() {
 
   btn.hidden = false;
   on(btn, "click", async () => {
-    const ok = window.confirm("Seguro que quieres resetear todos los votos?");
-    if (!ok) return;
-
-    setLoading(true);
-    try {
-      const resetFn = httpsCallable(functions, "resetAll");
-      const payload = state.group ? { group: state.group } : {};
-      await resetFn(payload);
-      toast("Reset completado.", "success");
-      await refreshData();
-      renderCurrentPage();
-    } catch (err) {
-      toast(`No se pudo resetear: ${parseError(err)}`, "error", 3800);
-      console.error("Reset error", err);
-    } finally {
-      setLoading(false);
-    }
+    toast("Reset por admin no disponible sin Cloud Functions.", "info", 4200);
   });
 }
 

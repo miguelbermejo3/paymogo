@@ -1,18 +1,47 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 3, 20);
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    match /beds/{bedId} {
+      allow read: if true;
+      allow create, delete: if false;
+
+      // Solo permitir incrementar "taken" en +1, en la misma transacción
+      // donde se crea votes/{uid} apuntando a esta cama.
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(["taken"]) &&
+        request.resource.data.taken is int &&
+        resource.data.taken is int &&
+        resource.data.capacity is int &&
+        request.resource.data.taken == resource.data.taken + 1 &&
+        request.resource.data.taken <= resource.data.capacity &&
+        !exists(/databases/$(database)/documents/votes/$(request.auth.uid)) &&
+        getAfter(/databases/$(database)/documents/votes/$(request.auth.uid)).data.uid == request.auth.uid &&
+        getAfter(/databases/$(database)/documents/votes/$(request.auth.uid)).data.bedId == bedId;
+    }
+
+    match /votes/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if false;
+
+      // Un voto por usuario. Solo si la cama existe y su taken sube +1
+      // en la misma transacción.
+      allow create: if isSignedIn() &&
+        request.auth.uid == uid &&
+        !exists(/databases/$(database)/documents/votes/$(uid)) &&
+        request.resource.data.uid == uid &&
+        request.resource.data.bedId is string &&
+        request.resource.data.bedId.size() > 0 &&
+        request.resource.data.keys().hasOnly(["uid", "bedId", "createdAt", "group"]) &&
+        exists(/databases/$(database)/documents/beds/$(request.resource.data.bedId)) &&
+        get(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.taken <
+          get(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.capacity &&
+        getAfter(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.taken ==
+          get(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.taken + 1;
     }
   }
 }
