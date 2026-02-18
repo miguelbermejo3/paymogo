@@ -39,6 +39,32 @@ body {
   position: relative;
 }
 
+/* General text centered across pages */
+.wrap,
+.hero,
+.content,
+.card,
+.footer,
+.foot {
+  text-align: center;
+}
+
+.hero__top,
+.hero__meta,
+.nav,
+.actions,
+.modal__actions,
+.legend {
+  justify-content: center;
+}
+
+.pill,
+.route-context,
+.stats,
+#stats {
+  justify-content: center;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -753,6 +779,7 @@ button:focus-visible,
 .bbq-form {
   display: grid;
   gap: 0.8rem;
+  text-align: left;
 }
 
 .form-grid {
@@ -775,6 +802,7 @@ button:focus-visible,
   display: grid;
   gap: 0.35rem;
   color: #eef2ff;
+  text-align: left;
 }
 
 .bbq-form input[type="radio"] {
@@ -830,6 +858,7 @@ button:focus-visible,
   background: rgba(18, 25, 52, 0.78) !important;
   color: #eef3ff !important;
   border: 1px solid rgba(173, 213, 255, 0.55) !important;
+  text-align: left !important;
 }
 
 #packingAssignedUser {
@@ -863,10 +892,25 @@ button:focus-visible,
   padding: 0.55rem 0.65rem;
   resize: vertical;
   min-height: 70px;
+  text-align: left;
 }
 
 .bbq-form textarea::placeholder {
   color: rgba(222, 232, 255, 0.55);
+}
+
+/* Keep form/data blocks left-aligned for readability */
+.bbq-form .card,
+.bbq-form fieldset,
+.bbq-form legend,
+.bbq-form label,
+.summary-row,
+.summary-toggle,
+.summary-users,
+#list li,
+#bbqRequests li,
+#packingList li {
+  text-align: left;
 }
 
 @media (min-width: 768px) {
