@@ -781,6 +781,46 @@ button:focus-visible,
   margin-right: 0.35rem;
 }
 
+.choice-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.choice-option {
+  display: block;
+}
+
+.choice-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice-option span {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(173, 213, 255, 0.35);
+  background: rgba(255, 255, 255, 0.07);
+  color: #e8eeff;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.choice-option input:checked + span {
+  background: linear-gradient(135deg, #dff2ff, #a8d3ff);
+  color: #081126;
+  border-color: rgba(215, 238, 255, 0.85);
+  box-shadow: 0 8px 18px rgba(89, 146, 255, 0.28);
+}
+
+.choice-option input:focus-visible + span {
+  outline: 2px solid #bde4ff;
+  outline-offset: 2px;
+}
+
 .bbq-form textarea {
   width: 100%;
   border: 1px solid rgba(173, 213, 255, 0.4);
