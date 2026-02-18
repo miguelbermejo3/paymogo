@@ -6,12 +6,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     match /beds/{bedId} {
       allow read: if true;
       allow create, delete: if false;
 
-      // Solo permitir incrementar "taken" en +1, en la misma transacción
-      // donde se crea votes/{uid} apuntando a esta cama.
+      // Se permite subir "taken" +1 solo si en la misma transacción
+      // se crea votes/{auth.uid} apuntando a esta cama.
       allow update: if isSignedIn() &&
         request.resource.data.diff(resource.data).changedKeys().hasOnly(["taken"]) &&
         request.resource.data.taken is int &&
@@ -25,18 +30,41 @@ service cloud.firestore {
     }
 
     match /votes/{uid} {
-      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow read: if isSignedIn() && uid == request.auth.uid;
       allow update, delete: if false;
 
-      // Un voto por usuario. Solo si la cama existe y su taken sube +1
-      // en la misma transacción.
+      // Un voto por auth uid. Además exige crear userVotes/{userId}
+      // en la misma transacción para bloquear voto doble por usuario lógico.
       allow create: if isSignedIn() &&
-        request.auth.uid == uid &&
+        uid == request.auth.uid &&
         !exists(/databases/$(database)/documents/votes/$(uid)) &&
         request.resource.data.uid == uid &&
+        request.resource.data.userId is string &&
+        request.resource.data.userId.size() > 0 &&
         request.resource.data.bedId is string &&
         request.resource.data.bedId.size() > 0 &&
-        request.resource.data.keys().hasOnly(["uid", "bedId", "createdAt", "group"]) &&
+        request.resource.data.keys().hasOnly(["uid", "userId", "userName", "bedId", "createdAt", "group"]) &&
+        !exists(/databases/$(database)/documents/userVotes/$(request.resource.data.userId)) &&
+        getAfter(/databases/$(database)/documents/userVotes/$(request.resource.data.userId)).data.uid == uid &&
+        getAfter(/databases/$(database)/documents/userVotes/$(request.resource.data.userId)).data.userId ==
+          request.resource.data.userId &&
+        getAfter(/databases/$(database)/documents/userVotes/$(request.resource.data.userId)).data.bedId ==
+          request.resource.data.bedId;
+    }
+
+    match /userVotes/{userId} {
+      allow read: if isSignedIn();
+      allow update, delete: if false;
+
+      // Un voto por userId. Debe existir la cama y aumentar taken +1
+      // en la misma transacción.
+      allow create: if isSignedIn() &&
+        !exists(/databases/$(database)/documents/userVotes/$(userId)) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.userId == userId &&
+        request.resource.data.bedId is string &&
+        request.resource.data.bedId.size() > 0 &&
+        request.resource.data.keys().hasOnly(["uid", "userId", "userName", "bedId", "createdAt", "group"]) &&
         exists(/databases/$(database)/documents/beds/$(request.resource.data.bedId)) &&
         get(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.taken <
           get(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.capacity &&

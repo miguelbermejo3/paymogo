@@ -28,6 +28,9 @@ const state = {
   uid: null,
   beds: [],
   myVote: null,
+  users: [],
+  userId: "",
+  userName: "",
   page: "unknown",
   group: params.get("group") || "",
   isAdmin: params.get("admin") === "1",
@@ -45,6 +48,8 @@ const escapeHtml = (s = "") =>
     const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
     return map[ch] || ch;
   });
+const LS_USER_ID = "paymogo_user_id";
+const LS_USER_NAME = "paymogo_user_name";
 
 function setLoading(isLoading) {
   document.body.classList.toggle("loading", !!isLoading);
@@ -203,6 +208,128 @@ async function ensureAuth() {
   }
 }
 
+function setCurrentUser(user) {
+  state.userId = user.id;
+  state.userName = user.displayName || user.id;
+  try {
+    localStorage.setItem(LS_USER_ID, state.userId);
+    localStorage.setItem(LS_USER_NAME, state.userName);
+  } catch (_) {}
+}
+
+function clearCurrentUser() {
+  state.userId = "";
+  state.userName = "";
+  try {
+    localStorage.removeItem(LS_USER_ID);
+    localStorage.removeItem(LS_USER_NAME);
+  } catch (_) {}
+}
+
+async function fetchUsers() {
+  try {
+    const snap = await getDocs(collection(db, "users"));
+    const users = snap.docs
+      .map((d) => {
+        const data = d.data() || {};
+        return {
+          id: d.id,
+          displayName: String(data.displayName || d.id),
+          pin: String(data.pin || ""),
+          active: data.active !== false,
+        };
+      })
+      .filter((u) => u.active)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName, "es"));
+    state.users = users;
+    return users;
+  } catch (err) {
+    toast(`No se pudieron cargar usuarios: ${parseError(err)}`, "error", 4200);
+    console.error("Users error", err);
+    return [];
+  }
+}
+
+function ensureIdentityModal() {
+  let modal = qs("#identityModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "identityModal";
+  modal.className = "modal is-open";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-labelledby", "identityTitle");
+  modal.innerHTML = `
+    <div class="modal__backdrop"></div>
+    <div class="modal__panel glass">
+      <h3 id="identityTitle">¿Quién eres?</h3>
+      <p class="meta">Elige tu nombre e introduce tu PIN para votar.</p>
+      <label class="meta" for="identityUserSelect">Usuario</label>
+      <select id="identityUserSelect" class="btn ghost" style="width:100%;justify-content:flex-start;"></select>
+      <label class="meta" for="identityPinInput">PIN</label>
+      <input id="identityPinInput" type="password" inputmode="numeric" autocomplete="one-time-code"
+        class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="PIN" />
+      <div class="modal__actions">
+        <button id="identitySubmitBtn" class="btn btn--primary" type="button">Entrar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+}
+
+async function ensureIdentity() {
+  const users = await fetchUsers();
+  if (!users.length) {
+    throw new Error("No hay usuarios activos en /users.");
+  }
+
+  const storedId = localStorage.getItem(LS_USER_ID) || "";
+  const storedUser = users.find((u) => u.id === storedId);
+  if (storedUser) {
+    setCurrentUser(storedUser);
+    return;
+  }
+
+  const modal = ensureIdentityModal();
+  const select = qs("#identityUserSelect", modal);
+  const pinInput = qs("#identityPinInput", modal);
+  const submitBtn = qs("#identitySubmitBtn", modal);
+
+  select.innerHTML = users
+    .map((u) => `<option value="${escapeHtml(u.id)}">${escapeHtml(u.displayName)}</option>`)
+    .join("");
+
+  await new Promise((resolve) => {
+    const tryLogin = () => {
+      const selected = users.find((u) => u.id === select.value);
+      const pin = String(pinInput.value || "");
+      if (!selected) {
+        toast("Selecciona un usuario.", "info");
+        return;
+      }
+      if (!selected.pin || pin !== selected.pin) {
+        toast("PIN incorrecto.", "error");
+        modal.classList.remove("shake");
+        void modal.offsetWidth;
+        modal.classList.add("shake");
+        return;
+      }
+
+      setCurrentUser(selected);
+      modal.setAttribute("aria-hidden", "true");
+      modal.classList.remove("is-open");
+      resolve();
+    };
+
+    on(submitBtn, "click", tryLogin);
+    on(pinInput, "keydown", (e) => {
+      if (e.key === "Enter") tryLogin();
+    });
+  });
+}
+
 async function fetchBeds() {
   try {
     const snap = await getDocs(collection(db, "beds"));
@@ -216,9 +343,9 @@ async function fetchBeds() {
 }
 
 async function fetchMyVote() {
-  if (!state.uid) return null;
+  if (!state.userId) return null;
   try {
-    const snap = await getDoc(doc(db, "votes", state.uid));
+    const snap = await getDoc(doc(db, "userVotes", state.userId));
     if (!snap.exists()) return null;
     return snap.data() || null;
   } catch (err) {
@@ -241,6 +368,13 @@ function renderStats() {
 function renderMyVoteButton() {
   const btn = qs("#myVoteBtn");
   if (!btn) return;
+
+  if (!state.userId) {
+    btn.disabled = true;
+    btn.classList.add("is-disabled");
+    btn.title = "Primero identifícate.";
+    return;
+  }
 
   const hasVote = !!state.myVote;
   btn.disabled = !hasVote;
@@ -437,6 +571,10 @@ function renderSummary() {
 
 async function voteForBed(bedId) {
   if (voteInFlight) return;
+  if (!state.userId) {
+    toast("Primero identifícate con tu usuario.", "info");
+    return;
+  }
   if (state.myVote) {
     toast("Ya votaste.", "info");
     return;
@@ -452,15 +590,18 @@ async function voteForBed(bedId) {
     }
 
     const voteRef = doc(db, "votes", state.uid);
+    const userVoteRef = doc(db, "userVotes", state.userId);
     const bedRef = doc(db, "beds", bedId);
 
     await runTransaction(db, async (tx) => {
-      const [voteSnap, bedSnap] = await Promise.all([
+      const [voteSnap, userVoteSnap, bedSnap] = await Promise.all([
         tx.get(voteRef),
+        tx.get(userVoteRef),
         tx.get(bedRef),
       ]);
 
       if (voteSnap.exists()) throw new Error("Ya votaste.");
+      if (userVoteSnap.exists()) throw new Error("Este usuario ya votó.");
       if (!bedSnap.exists()) throw new Error("La cama no existe.");
 
       const bed = bedSnap.data() || {};
@@ -470,12 +611,17 @@ async function voteForBed(bedId) {
       if (taken >= capacity) throw new Error("Esa cama ya está llena.");
 
       tx.update(bedRef, { taken: taken + 1 });
-      tx.set(voteRef, {
+      const votePayload = {
         uid: state.uid,
+        userId: state.userId,
+        userName: state.userName,
         bedId,
         createdAt: serverTimestamp(),
         ...(state.group ? { group: state.group } : {}),
-      });
+      };
+
+      tx.set(voteRef, votePayload);
+      tx.set(userVoteRef, votePayload);
     });
 
     confettiBoom();
@@ -559,7 +705,13 @@ function renderCurrentPage() {
   renderMyVoteModal();
 
   const routeContext = qs("#routeContext");
-  if (routeContext) routeContext.dataset.group = state.group;
+  if (routeContext) {
+    routeContext.dataset.group = state.group;
+    const small = qs("small", routeContext);
+    if (small && state.userName) {
+      small.textContent = `Usuario: ${state.userName}${state.group ? ` · Grupo: ${state.group}` : ""}`;
+    }
+  }
 
   if (state.page === "index") {
     renderIndexPreview();
@@ -579,6 +731,7 @@ async function bootstrap() {
 
   try {
     await ensureAuth();
+    await ensureIdentity();
     await refreshData();
     renderCurrentPage();
     wireChooseEvents();
