@@ -703,6 +703,33 @@ button:focus-visible,
   margin-top: 0.9rem;
 }
 
+.home-menu {
+  grid-template-columns: 1fr;
+}
+
+.menu-card {
+  display: grid;
+  gap: 0.45rem;
+  text-decoration: none;
+  color: inherit;
+  min-height: 170px;
+  align-content: space-between;
+}
+
+.menu-card h2 {
+  margin-bottom: 0.1rem;
+}
+
+.menu-card p {
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .home-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* Mobile-first fine tuning */
 @media (max-width: 479px) {
   .hero h1 {

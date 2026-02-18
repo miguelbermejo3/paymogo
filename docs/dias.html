@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Votación de días</title>
+    <link rel="stylesheet" href="./style.css?v=20260218" />
+  </head>
+  <body>
+    <div class="bg-blobs" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="blob blob-c"></span>
+    </div>
+
+    <div class="wrap" id="app">
+      <header class="hero glass">
+        <div class="hero__top">
+          <p class="eyebrow">Nueva votación</p>
+          <h1>Votación de días 📅</h1>
+          <p class="subtitle">Esta sección estará disponible muy pronto.</p>
+        </div>
+        <nav class="nav">
+          <a class="nav__link" href="./index.html">Home</a>
+          <a class="nav__link" href="./elegir.html">Votación de camas</a>
+          <a class="nav__link" href="./resumen.html">Resumen</a>
+        </nav>
+      </header>
+
+      <main class="content">
+        <section class="card glass">
+          <h2>Próximamente</h2>
+          <p>Aquí podréis votar qué días se apunta cada persona al plan.</p>
+          <a class="btn btn--primary" href="./index.html">Volver a Home</a>
+        </section>
+      </main>
+
+      <footer class="footer foot">
+        <p>Planificando el caos con cariño ❤️</p>
+      </footer>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script type="module" src="./app.js?v=20260218"></script>
+  </body>
+</html>

@@ -473,6 +473,7 @@ function wireModalEvents() {
 function renderIndexPreview() {
   const wrap = qs("#bedsPreview");
   if (!wrap) return;
+  if (wrap.dataset.static === "true") return;
 
   if (!state.beds.length) {
     wrap.innerHTML = `<article class="card glass"><p>No hay camas disponibles para mostrar.</p></article>`;
