@@ -737,6 +737,19 @@ button:focus-visible,
   width: 100%;
 }
 
+.bed-card {
+  cursor: pointer;
+}
+
+.bed-card .choose-btn {
+  cursor: pointer;
+}
+
+#bedInfoDescription {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
 @media (min-width: 768px) {
   .home-menu {
     grid-template-columns: repeat(2, minmax(0, 1fr));

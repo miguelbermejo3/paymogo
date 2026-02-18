@@ -485,6 +485,39 @@ function closeModal() {
   modal.classList.remove("is-open");
 }
 
+function openBedInfoModal() {
+  const modal = qs("#bedInfoModal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden", "false");
+  modal.classList.add("is-open");
+}
+
+function closeBedInfoModal() {
+  const modal = qs("#bedInfoModal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden", "true");
+  modal.classList.remove("is-open");
+}
+
+function renderBedInfo(bedId) {
+  const modal = qs("#bedInfoModal");
+  if (!modal) return;
+
+  const bed = state.beds.find((b) => b.id === bedId);
+  const title = qs("#bedInfoTitle", modal);
+  const desc = qs("#bedInfoDescription", modal);
+  const voters = qs("#bedInfoVoters", modal);
+  if (!bed || !title || !desc || !voters) return;
+
+  title.textContent = bed.displayName;
+  desc.textContent = bed.description || "Esta cama no tiene descripción.";
+
+  const names = state.userVotes.filter((v) => v.bedId === bedId);
+  voters.innerHTML = names.length
+    ? names.map((v) => `<li>${escapeHtml(v.userName)}</li>`).join("")
+    : "<li class=\"meta\">Sin votos todavía.</li>";
+}
+
 function wireModalEvents() {
   const modal = qs("#myVoteModal");
   if (!modal) return;
@@ -507,7 +540,22 @@ function wireModalEvents() {
   });
 
   on(document, "keydown", (e) => {
-    if (e.key === "Escape") closeModal();
+    if (e.key === "Escape") {
+      closeModal();
+      closeBedInfoModal();
+    }
+  });
+}
+
+function wireBedInfoEvents() {
+  const modal = qs("#bedInfoModal");
+  if (!modal) return;
+
+  qsa("[data-close-bed-info]", modal).forEach((el) => {
+    on(el, "click", () => {
+      tapFx();
+      closeBedInfoModal();
+    });
   });
 }
 
@@ -569,6 +617,7 @@ function renderChooseGrid() {
     const disabled = full || hasVote;
     const card = document.createElement("article");
     card.className = `card bed-card glass ${full ? "is-full" : ""}`;
+    card.dataset.bedId = bed.id;
     card.innerHTML = `
       <header class="bed-card__head">
         <h3>${escapeHtml(bed.displayName)}</h3>
@@ -848,6 +897,17 @@ function wireChooseEvents() {
 
     await voteForBed(bedId);
   });
+
+  on(grid, "click", (e) => {
+    if (e.target.closest(".choose-btn")) return;
+    const card = e.target.closest(".bed-card");
+    if (!card) return;
+    const bedId = card.dataset.bedId;
+    if (!bedId) return;
+    tapFx();
+    renderBedInfo(bedId);
+    openBedInfoModal();
+  });
 }
 
 function wireDaysEvents() {
@@ -941,6 +1001,7 @@ async function bootstrap() {
   setLoading(true);
   wireGeneralEffects();
   wireModalEvents();
+  wireBedInfoEvents();
 
   try {
     await ensureAuth();
