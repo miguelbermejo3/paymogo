@@ -551,7 +551,13 @@ function renderSummary() {
       state.beds.forEach((bed) => {
         const li = document.createElement("li");
         li.className = "summary-row";
-        li.textContent = `${bed.displayName}: ${bed.taken}/${bed.capacity} ocupadas (${bed.free} libres)`;
+        const statusClass = bed.free === 0 ? "sold" : bed.free === 1 ? "badge--warning" : "badge";
+        const statusText = bed.free === 0 ? "LLENA" : bed.free === 1 ? "ULTIMAS PLAZAS" : "LIBRE";
+        li.innerHTML = `
+          <span class="name">${escapeHtml(bed.displayName)}</span>
+          <span class="meta">${bed.taken}/${bed.capacity} ocupadas (${bed.free} libres)</span>
+          <span class="${statusClass}">${statusText}</span>
+        `;
         list.appendChild(li);
       });
     }

@@ -274,6 +274,21 @@ body::before {
   border-color: rgba(255, 127, 148, 0.55);
 }
 
+.badge--warning {
+  background: rgba(255, 201, 94, 0.2);
+  color: #ffeec4;
+  border: 1px solid rgba(255, 201, 94, 0.65);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.23rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .progress {
   margin-top: 0.6rem;
   width: 100%;
@@ -645,6 +660,8 @@ button:focus-visible,
 
 .summary-row {
   line-height: 1.35;
+  display: grid;
+  gap: 0.4rem;
 }
 
 .summary-cta {
