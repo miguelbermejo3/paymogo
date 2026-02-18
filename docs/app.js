@@ -28,6 +28,7 @@ const state = {
   uid: null,
   beds: [],
   myVote: null,
+  userVotes: [],
   users: [],
   userId: "",
   userName: "",
@@ -355,6 +356,25 @@ async function fetchMyVote() {
   }
 }
 
+async function fetchAllUserVotes() {
+  try {
+    const snap = await getDocs(collection(db, "userVotes"));
+    return snap.docs.map((d) => {
+      const data = d.data() || {};
+      return {
+        id: d.id,
+        bedId: String(data.bedId || ""),
+        userId: String(data.userId || d.id),
+        userName: String(data.userName || data.userId || d.id),
+      };
+    });
+  } catch (err) {
+    toast(`No se pudieron leer votos por cama: ${parseError(err)}`, "error", 3600);
+    console.error("User votes read error", err);
+    return [];
+  }
+}
+
 function renderStats() {
   const el = qs("#stats");
   if (!el) return;
@@ -549,16 +569,37 @@ function renderSummary() {
       list.appendChild(li);
     } else {
       state.beds.forEach((bed) => {
+        const occupants = state.userVotes.filter((v) => v.bedId === bed.id);
         const li = document.createElement("li");
         li.className = "summary-row";
         const statusClass = bed.free === 0 ? "sold" : bed.free === 1 ? "badge--warning" : "badge";
         const statusText = bed.free === 0 ? "LLENA" : bed.free === 1 ? "ULTIMAS PLAZAS" : "LIBRE";
+        const namesHtml = occupants.length
+          ? occupants.map((v) => `<li>${escapeHtml(v.userName)}</li>`).join("")
+          : "<li class=\"meta\">Sin nombres registrados todavía.</li>";
         li.innerHTML = `
-          <span class="name">${escapeHtml(bed.displayName)}</span>
-          <span class="meta">${bed.taken}/${bed.capacity} ocupadas (${bed.free} libres)</span>
-          <span class="${statusClass}">${statusText}</span>
+          <button class="summary-toggle ghost" type="button" aria-expanded="false" data-bed-id="${escapeHtml(bed.id)}">
+            <span class="name">${escapeHtml(bed.displayName)}</span>
+            <span class="meta">${bed.taken}/${bed.capacity} ocupadas (${bed.free} libres)</span>
+            <span class="${statusClass}">${statusText}</span>
+          </button>
+          <div class="summary-users hidden" data-users-for="${escapeHtml(bed.id)}">
+            <strong>Personas en esta cama:</strong>
+            <ul>${namesHtml}</ul>
+          </div>
         `;
         list.appendChild(li);
+      });
+
+      qsa(".summary-toggle", list).forEach((btn) => {
+        on(btn, "click", () => {
+          const bedId = btn.dataset.bedId || "";
+          const panel = qsa("[data-users-for]", list).find((el) => el.dataset.usersFor === bedId);
+          if (!panel) return;
+          const isOpen = !panel.classList.contains("hidden");
+          panel.classList.toggle("hidden", isOpen);
+          btn.setAttribute("aria-expanded", String(!isOpen));
+        });
       });
     }
   }
@@ -700,9 +741,14 @@ async function handleAdminReset() {
 }
 
 async function refreshData() {
-  const [beds, myVote] = await Promise.all([fetchBeds(), fetchMyVote()]);
+  const [beds, myVote, userVotes] = await Promise.all([
+    fetchBeds(),
+    fetchMyVote(),
+    fetchAllUserVotes(),
+  ]);
   state.beds = beds;
   state.myVote = myVote;
+  state.userVotes = userVotes;
 }
 
 function renderCurrentPage() {
