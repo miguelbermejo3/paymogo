@@ -65,6 +65,87 @@ const DAY_OPTIONS = [
   { id: "viernes_sabado", label: "Viernes y Sábado", subtitle: "Plan completo" },
 ];
 
+function computeBrotherRanking() {
+  const baseUsers = (state.users || []).map((u) => ({
+    userId: u.id,
+    userName: u.displayName || u.id,
+    points: 0,
+  }));
+
+  const map = new Map(baseUsers.map((u) => [u.userId, u]));
+  const ensure = (id, fallbackName = id) => {
+    if (!id) return null;
+    if (!map.has(id)) {
+      map.set(id, { userId: id, userName: fallbackName || id, points: 0 });
+    }
+    return map.get(id);
+  };
+
+  state.dayVotes.forEach((v) => {
+    const row = ensure(v.userId, v.userName);
+    if (!row) return;
+    row.points += v.optionId === "viernes_sabado" ? 3 : 1;
+  });
+
+  state.userVotes.forEach((v) => {
+    if (v.bedId !== "individual1") return;
+    const row = ensure(v.userId, v.userName);
+    if (!row) return;
+    row.points += 2;
+  });
+
+  state.bbqVotes.forEach((v) => {
+    const row = ensure(v.userId, v.userName);
+    if (!row) return;
+    if (v.asiste) row.points += 1;
+    if (v.cuentaComida) row.points += 1;
+    if (v.cuentaBebida) row.points += 1;
+  });
+
+  state.packingItems.forEach((it) => {
+    const row = ensure(it.addedByUserId, it.addedByUserName);
+    if (!row) return;
+    row.points += 1;
+  });
+
+  return [...map.values()].sort((a, b) => b.points - a.points || a.userName.localeCompare(b.userName, "es"));
+}
+
+function renderBrotherLeaderboard() {
+  const podium = qs("#leaderboardPodium");
+  const list = qs("#leaderboardList");
+  if (!podium || !list) return;
+
+  const ranking = computeBrotherRanking();
+
+  const top3 = [ranking[0], ranking[1], ranking[2]];
+  podium.innerHTML = top3
+    .map((u, idx) => `
+      <article class="card glass podium-slot podium-${idx + 1}">
+        <strong>#${idx + 1}</strong>
+        <span class="name">${escapeHtml(u?.userName || "-")}</span>
+        <span class="meta">${u?.points ?? 0} pts</span>
+      </article>
+    `)
+    .join("");
+
+  list.innerHTML = "";
+  if (!ranking.length) {
+    list.innerHTML = "<li class=\"meta\">Sin datos todavía.</li>";
+    return;
+  }
+
+  ranking.forEach((u, i) => {
+    const li = document.createElement("li");
+    li.className = "leader-row";
+    li.innerHTML = `
+      <span class="name">${i + 1}. ${escapeHtml(u.userName)}</span>
+      <span class="badge">${u.points} pts</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
 function setLoading(isLoading) {
   document.body.classList.toggle("loading", !!isLoading);
 }
@@ -1395,6 +1476,7 @@ function renderCurrentPage() {
   if (state.page === "index") {
     renderIndexPreview();
     renderIndexCTA();
+    renderBrotherLeaderboard();
   } else if (state.page === "elegir") {
     renderChooseGrid();
   } else if (state.page === "dias") {

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Encuesta Camas</title>
-    <link rel="stylesheet" href="./style.css?v=20260226" />
+    <link rel="stylesheet" href="./style.css?v=20260227" />
   </head>
   <body>
     <div class="bg-blobs" aria-hidden="true">
@@ -71,6 +71,31 @@ Vota ahora y que el finde salga 10/10, bien organizado y sin dramas. 🎉</p>
             <span class="chip">Disponible</span>
           </a>
         </section>
+
+        <section class="card glass" id="brotherLeaderboard" aria-label="Clasificación de hermano">
+          <h2>Clasificación de hermano 🏆</h2>
+          <p class="meta">Se actualiza automáticamente según votaciones.</p>
+          <div id="leaderboardPodium" class="podium-grid">
+            <article class="card glass podium-slot">
+              <strong>#1</strong>
+              <span class="name">-</span>
+              <span class="meta">0 pts</span>
+            </article>
+            <article class="card glass podium-slot">
+              <strong>#2</strong>
+              <span class="name">-</span>
+              <span class="meta">0 pts</span>
+            </article>
+            <article class="card glass podium-slot">
+              <strong>#3</strong>
+              <span class="name">-</span>
+              <span class="meta">0 pts</span>
+            </article>
+          </div>
+          <ul id="leaderboardList" class="leaderboard-list">
+            <li class="meta">Cargando clasificación...</li>
+          </ul>
+        </section>
       </main>
 
       <footer class="footer foot">
@@ -96,9 +121,10 @@ Vota ahora y que el finde salga 10/10, bien organizado y sin dramas. 🎉</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script type="module" src="./app.js?v=20260226"></script>
+    <script type="module" src="./app.js?v=20260227"></script>
   </body>
 </html>
+
 
 
 
