@@ -200,6 +200,15 @@ function confettiBoom() {
   });
 }
 
+function thankUserForVote() {
+  const name = state.userName || "compa";
+  toast(
+    `Gracias ${name}. Este voto cuenta mucho para mí y para tu posición en la clasificación de hermano, sigue así.`,
+    "success",
+    5200
+  );
+}
+
 function tapFx() {
   try {
     if (navigator.vibrate) navigator.vibrate(15);
@@ -1148,7 +1157,7 @@ async function voteForBed(bedId) {
     });
 
     confettiBoom();
-    toast("Voto registrado. Perfecto!", "success");
+    thankUserForVote();
     await sleep(180);
 
     await refreshData();
@@ -1208,7 +1217,7 @@ async function voteForDay(optionId) {
     });
 
     confettiBoom();
-    toast("Voto de días registrado.", "success");
+    thankUserForVote();
     await refreshData();
     renderCurrentPage();
   } catch (err) {
@@ -1256,7 +1265,8 @@ async function saveBbqVoteFromForm() {
   setLoading(true);
   try {
     await setDoc(doc(db, "bbqVotes", state.userId), payload, { merge: true });
-    toast("Respuesta de barbacoa guardada.", "success");
+    confettiBoom();
+    thankUserForVote();
     await refreshData();
     renderCurrentPage();
   } catch (err) {
@@ -1307,7 +1317,8 @@ async function savePackingItemFromForm() {
     form.reset();
     const sel = qs("#packingAssignedUser", form);
     if (sel && state.users.length) sel.value = state.users[0].id;
-    toast("Item añadido a la maleta comunitaria.", "success");
+    confettiBoom();
+    thankUserForVote();
     await refreshData();
     renderCurrentPage();
   } catch (err) {
