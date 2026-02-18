@@ -28,7 +28,9 @@ const state = {
   uid: null,
   beds: [],
   myVote: null,
+  myDayVote: null,
   userVotes: [],
+  dayVotes: [],
   users: [],
   userId: "",
   userName: "",
@@ -51,6 +53,11 @@ const escapeHtml = (s = "") =>
   });
 const LS_USER_ID = "paymogo_user_id";
 const LS_USER_NAME = "paymogo_user_name";
+const DAY_OPTIONS = [
+  { id: "viernes", label: "Viernes", subtitle: "Solo viernes" },
+  { id: "sabado", label: "Sábado", subtitle: "Solo sábado" },
+  { id: "viernes_sabado", label: "Viernes y Sábado", subtitle: "Plan completo" },
+];
 
 function setLoading(isLoading) {
   document.body.classList.toggle("loading", !!isLoading);
@@ -123,6 +130,7 @@ function tapFx() {
 
 function detectPage() {
   if (qs("#bedsGrid")) return "elegir";
+  if (qs("#daysOptions")) return "dias";
   if (qs("#summary")) return "resumen";
   if (qs("#bedsPreview")) return "index";
   return "unknown";
@@ -375,6 +383,39 @@ async function fetchAllUserVotes() {
   }
 }
 
+async function fetchMyDayVote() {
+  if (!state.userId) return null;
+  try {
+    const snap = await getDoc(doc(db, "dayVotes", state.userId));
+    if (!snap.exists()) return null;
+    return snap.data() || null;
+  } catch (err) {
+    toast(`No se pudo leer tu voto de días: ${parseError(err)}`, "error", 3600);
+    console.error("Day vote read error", err);
+    return null;
+  }
+}
+
+async function fetchAllDayVotes() {
+  try {
+    const snap = await getDocs(collection(db, "dayVotes"));
+    return snap.docs.map((d) => {
+      const data = d.data() || {};
+      return {
+        id: d.id,
+        optionId: String(data.optionId || ""),
+        optionLabel: String(data.optionLabel || ""),
+        userId: String(data.userId || d.id),
+        userName: String(data.userName || data.userId || d.id),
+      };
+    });
+  } catch (err) {
+    toast(`No se pudieron leer votos de días: ${parseError(err)}`, "error", 3600);
+    console.error("Day votes read error", err);
+    return [];
+  }
+}
+
 function renderStats() {
   const el = qs("#stats");
   if (!el) return;
@@ -617,6 +658,53 @@ function renderSummary() {
   }
 }
 
+function renderDaysPage() {
+  const optionsWrap = qs("#daysOptions");
+  if (!optionsWrap) return;
+
+  const myDayVoteEl = qs("#myDayVote");
+  if (myDayVoteEl) {
+    if (state.myDayVote?.optionLabel) {
+      myDayVoteEl.textContent = `Tu voto de días: ${state.myDayVote.optionLabel}`;
+    } else {
+      myDayVoteEl.textContent = "Aún no has votado los días.";
+    }
+  }
+
+  const counts = DAY_OPTIONS.reduce((acc, opt) => {
+    acc[opt.id] = 0;
+    return acc;
+  }, {});
+  state.dayVotes.forEach((v) => {
+    if (counts[v.optionId] !== undefined) counts[v.optionId] += 1;
+  });
+
+  optionsWrap.innerHTML = "";
+  DAY_OPTIONS.forEach((opt) => {
+    const voters = state.dayVotes.filter((v) => v.optionId === opt.id);
+    const selectedByMe = state.myDayVote?.optionId === opt.id;
+    const locked = !!state.myDayVote;
+    const card = document.createElement("article");
+    card.className = `card glass day-card ${selectedByMe ? "celebrate" : ""}`;
+    const votersHtml = voters.length
+      ? voters.map((v) => `<li>${escapeHtml(v.userName)}</li>`).join("")
+      : "<li class=\"meta\">Sin votos todavía.</li>";
+    card.innerHTML = `
+      <h3>${escapeHtml(opt.label)}</h3>
+      <p class="meta">${escapeHtml(opt.subtitle)}</p>
+      <span class="badge">${counts[opt.id]} voto${counts[opt.id] === 1 ? "" : "s"}</span>
+      <button class="btn btn--primary choose-day-btn" data-day-option="${opt.id}" ${locked ? "disabled" : ""}>
+        ${selectedByMe ? "Tu elección" : locked ? "Ya votaste" : "Votar opción"}
+      </button>
+      <div class="summary-users">
+        <strong>Votantes:</strong>
+        <ul>${votersHtml}</ul>
+      </div>
+    `;
+    optionsWrap.appendChild(card);
+  });
+}
+
 async function voteForBed(bedId) {
   if (voteInFlight) return;
   if (!state.userId) {
@@ -692,6 +780,59 @@ async function voteForBed(bedId) {
   }
 }
 
+async function voteForDay(optionId) {
+  if (voteInFlight) return;
+  if (!state.userId) {
+    toast("Primero identifícate con tu usuario.", "info");
+    return;
+  }
+  if (state.myDayVote) {
+    toast("Ya votaste los días.", "info");
+    return;
+  }
+
+  const opt = DAY_OPTIONS.find((o) => o.id === optionId);
+  if (!opt) {
+    toast("Opción de días no válida.", "error");
+    return;
+  }
+
+  voteInFlight = true;
+  setLoading(true);
+  tapFx();
+
+  try {
+    if (!state.uid) throw new Error("No autenticado.");
+
+    const ref = doc(db, "dayVotes", state.userId);
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (snap.exists()) throw new Error("Este usuario ya votó los días.");
+
+      tx.set(ref, {
+        uid: state.uid,
+        userId: state.userId,
+        userName: state.userName,
+        optionId: opt.id,
+        optionLabel: opt.label,
+        createdAt: serverTimestamp(),
+        ...(state.group ? { group: state.group } : {}),
+      });
+    });
+
+    confettiBoom();
+    toast("Voto de días registrado.", "success");
+    await refreshData();
+    renderCurrentPage();
+  } catch (err) {
+    toast(parseError(err), "error", 3800);
+    console.error("Day vote error", err);
+  } finally {
+    voteInFlight = false;
+    setLoading(false);
+  }
+}
+
 function wireChooseEvents() {
   const grid = qs("#bedsGrid");
   if (!grid) return;
@@ -706,6 +847,19 @@ function wireChooseEvents() {
     if (!bedId) return;
 
     await voteForBed(bedId);
+  });
+}
+
+function wireDaysEvents() {
+  const wrap = qs("#daysOptions");
+  if (!wrap) return;
+
+  on(wrap, "click", async (e) => {
+    const btn = e.target.closest(".choose-day-btn");
+    if (!btn || btn.disabled) return;
+    const optionId = btn.dataset.dayOption;
+    if (!optionId) return;
+    await voteForDay(optionId);
   });
 }
 
@@ -742,14 +896,18 @@ async function handleAdminReset() {
 }
 
 async function refreshData() {
-  const [beds, myVote, userVotes] = await Promise.all([
+  const [beds, myVote, userVotes, myDayVote, dayVotes] = await Promise.all([
     fetchBeds(),
     fetchMyVote(),
     fetchAllUserVotes(),
+    fetchMyDayVote(),
+    fetchAllDayVotes(),
   ]);
   state.beds = beds;
   state.myVote = myVote;
   state.userVotes = userVotes;
+  state.myDayVote = myDayVote;
+  state.dayVotes = dayVotes;
 }
 
 function renderCurrentPage() {
@@ -771,6 +929,8 @@ function renderCurrentPage() {
     renderIndexCTA();
   } else if (state.page === "elegir") {
     renderChooseGrid();
+  } else if (state.page === "dias") {
+    renderDaysPage();
   } else if (state.page === "resumen") {
     renderSummary();
   }
@@ -788,6 +948,7 @@ async function bootstrap() {
     await refreshData();
     renderCurrentPage();
     wireChooseEvents();
+    wireDaysEvents();
     await handleAdminReset();
   } catch (err) {
     console.error("Bootstrap error", err);

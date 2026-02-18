@@ -724,9 +724,26 @@ button:focus-visible,
   margin: 0;
 }
 
+.option-grid {
+  grid-template-columns: 1fr;
+}
+
+.day-card {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.day-card .btn {
+  width: 100%;
+}
+
 @media (min-width: 768px) {
   .home-menu {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .option-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

@@ -71,5 +71,28 @@ service cloud.firestore {
         getAfter(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.taken ==
           get(/databases/$(database)/documents/beds/$(request.resource.data.bedId)).data.taken + 1;
     }
+
+    match /dayVotes/{userId} {
+      allow read: if isSignedIn();
+      allow update, delete: if false;
+
+      // Un solo voto de días por userId.
+      allow create: if isSignedIn() &&
+        !exists(/databases/$(database)/documents/dayVotes/$(userId)) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.userId == userId &&
+        request.resource.data.optionId in ["viernes", "sabado", "viernes_sabado"] &&
+        request.resource.data.optionLabel is string &&
+        request.resource.data.optionLabel.size() > 0 &&
+        request.resource.data.keys().hasOnly([
+          "uid",
+          "userId",
+          "userName",
+          "optionId",
+          "optionLabel",
+          "createdAt",
+          "group",
+        ]);
+    }
   }
 }
