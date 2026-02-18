@@ -451,6 +451,23 @@ button[disabled],
   background: rgba(255, 255, 255, 0.08);
 }
 
+#daysSummaryList,
+#bbqSummaryList {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.62rem;
+}
+
+#daysSummaryList li,
+#bbqSummaryList li {
+  padding: 0.78rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+}
+
 #toast {
   position: fixed;
   left: 50%;

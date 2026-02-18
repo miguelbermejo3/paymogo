@@ -716,6 +716,11 @@ function renderSummary() {
   const summary = qs("#summary");
   const list = qs("#list");
   const myVote = qs("#myVote");
+  const myDayVoteSummary = qs("#myDayVoteSummary");
+  const daysSummaryList = qs("#daysSummaryList");
+  const myBbqSummary = qs("#myBbqSummary");
+  const bbqSummaryTotals = qs("#bbqSummaryTotals");
+  const bbqSummaryList = qs("#bbqSummaryList");
 
   if (myVote) {
     const myBed = findMyBed();
@@ -765,6 +770,76 @@ function renderSummary() {
           panel.classList.toggle("hidden", isOpen);
           btn.setAttribute("aria-expanded", String(!isOpen));
         });
+      });
+    }
+  }
+
+  if (myDayVoteSummary) {
+    myDayVoteSummary.textContent = state.myDayVote?.optionLabel
+      ? `Tu voto de días: ${state.myDayVote.optionLabel}`
+      : "Aún no has votado los días.";
+  }
+
+  if (daysSummaryList) {
+    daysSummaryList.innerHTML = "";
+    DAY_OPTIONS.forEach((opt) => {
+      const voters = state.dayVotes.filter((v) => v.optionId === opt.id);
+      const li = document.createElement("li");
+      li.className = "summary-row";
+      const votersHtml = voters.length
+        ? voters.map((v) => `<li>${escapeHtml(v.userName)}</li>`).join("")
+        : "<li class=\"meta\">Sin votos.</li>";
+      li.innerHTML = `
+        <span class="name">${escapeHtml(opt.label)}</span>
+        <span class="badge">${voters.length} voto${voters.length === 1 ? "" : "s"}</span>
+        <div class="summary-users">
+          <strong>Quién va:</strong>
+          <ul>${votersHtml}</ul>
+        </div>
+      `;
+      daysSummaryList.appendChild(li);
+    });
+  }
+
+  const attending = state.bbqVotes.filter((v) => v.asiste);
+  const bbqComida = attending.filter((v) => v.cuentaComida).length;
+  const bbqBebida = attending.filter((v) => v.cuentaBebida).length;
+
+  if (myBbqSummary) {
+    if (!state.myBbqVote) {
+      myBbqSummary.textContent = "Aún no has respondido la barbacoa.";
+    } else {
+      myBbqSummary.textContent = state.myBbqVote.asiste
+        ? "Tu estado barbacoa: Asistes."
+        : "Tu estado barbacoa: No asistes.";
+    }
+  }
+
+  if (bbqSummaryTotals) {
+    bbqSummaryTotals.innerHTML = `
+      <span class="badge">${attending.length} asistentes</span>
+      <span class="badge">${bbqComida} comida</span>
+      <span class="badge">${bbqBebida} bebida</span>
+    `;
+  }
+
+  if (bbqSummaryList) {
+    bbqSummaryList.innerHTML = "";
+    if (!state.bbqVotes.length) {
+      bbqSummaryList.innerHTML = "<li class=\"meta\">Sin respuestas de barbacoa todavía.</li>";
+    } else {
+      state.bbqVotes.forEach((v) => {
+        const li = document.createElement("li");
+        li.className = "summary-row";
+        li.innerHTML = `
+          <span class="name">${escapeHtml(v.userName)}</span>
+          <span class="${v.asiste ? "badge" : "sold"}">${v.asiste ? "ASISTE" : "NO ASISTE"}</span>
+          <span class="meta">Comida: ${v.cuentaComida ? "Sí" : "No"} · Bebida: ${v.cuentaBebida ? "Sí" : "No"}</span>
+          ${v.peticionComida ? `<span class="meta">Pide comida: ${escapeHtml(v.peticionComida)}</span>` : ""}
+          ${v.peticionBebida ? `<span class="meta">Pide bebida: ${escapeHtml(v.peticionBebida)}</span>` : ""}
+          ${v.noQuiere ? `<span class="meta">No quiere: ${escapeHtml(v.noQuiere)}</span>` : ""}
+        `;
+        bbqSummaryList.appendChild(li);
       });
     }
   }
