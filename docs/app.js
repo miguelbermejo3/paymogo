@@ -909,17 +909,16 @@ function renderSummary() {
     DAY_OPTIONS.forEach((opt) => {
       const voters = state.dayVotes.filter((v) => v.optionId === opt.id);
       const li = document.createElement("li");
-      li.className = "summary-row";
+      li.className = "summary-flat-card";
       const votersHtml = voters.length
-        ? voters.map((v) => `<li>${escapeHtml(v.userName)}</li>`).join("")
-        : "<li class=\"meta\">Sin votos.</li>";
+        ? voters.map((v) => `<span class="voter-chip">${escapeHtml(v.userName)}</span>`).join("")
+        : "<span class=\"meta\">Sin votos.</span>";
       li.innerHTML = `
-        <span class="name">${escapeHtml(opt.label)}</span>
-        <span class="badge">${voters.length} voto${voters.length === 1 ? "" : "s"}</span>
-        <div class="summary-users">
-          <strong>Quién va:</strong>
-          <ul>${votersHtml}</ul>
+        <div class="summary-flat-head">
+          <span class="name">${escapeHtml(opt.label)}</span>
+          <span class="pill">${voters.length} voto${voters.length === 1 ? "" : "s"}</span>
         </div>
+        <div class="voter-row">${votersHtml}</div>
       `;
       daysSummaryList.appendChild(li);
     });
@@ -954,14 +953,20 @@ function renderSummary() {
     } else {
       state.bbqVotes.forEach((v) => {
         const li = document.createElement("li");
-        li.className = "summary-row";
+        li.className = "summary-flat-card";
         li.innerHTML = `
-          <span class="name">${escapeHtml(v.userName)}</span>
-          <span class="${v.asiste ? "badge" : "sold"}">${v.asiste ? "ASISTE" : "NO ASISTE"}</span>
-          <span class="meta">Comida: ${v.cuentaComida ? "Sí" : "No"} · Bebida: ${v.cuentaBebida ? "Sí" : "No"}</span>
-          ${v.peticionComida ? `<span class="meta">Pide comida: ${escapeHtml(v.peticionComida)}</span>` : ""}
-          ${v.peticionBebida ? `<span class="meta">Pide bebida: ${escapeHtml(v.peticionBebida)}</span>` : ""}
-          ${v.noQuiere ? `<span class="meta">No quiere: ${escapeHtml(v.noQuiere)}</span>` : ""}
+          <div class="summary-flat-head">
+            <span class="name">${escapeHtml(v.userName)}</span>
+            <span class="${v.asiste ? "badge" : "sold"}">${v.asiste ? "ASISTE" : "NO ASISTE"}</span>
+          </div>
+          <span class="meta">Comida: ${v.cuentaComida ? "Si" : "No"} · Bebida: ${v.cuentaBebida ? "Si" : "No"}</span>
+          ${(v.peticionComida || v.peticionBebida || v.noQuiere)
+            ? `<div class="voter-row">
+                ${v.peticionComida ? `<span class="voter-chip">Comida: ${escapeHtml(v.peticionComida)}</span>` : ""}
+                ${v.peticionBebida ? `<span class="voter-chip">Bebida: ${escapeHtml(v.peticionBebida)}</span>` : ""}
+                ${v.noQuiere ? `<span class="voter-chip">No quiere: ${escapeHtml(v.noQuiere)}</span>` : ""}
+              </div>`
+            : ""}
         `;
         bbqSummaryList.appendChild(li);
       });

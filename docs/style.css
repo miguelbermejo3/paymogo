@@ -462,10 +462,9 @@ button[disabled],
 
 #daysSummaryList li,
 #bbqSummaryList li {
-  padding: 0.78rem 0.85rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.08);
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 #toast {
@@ -740,6 +739,50 @@ button:focus-visible,
   padding-left: 1rem;
   display: grid;
   gap: 0.2rem;
+}
+
+.summary-flat-card {
+  padding: 0.82rem 0.9rem !important;
+  border-radius: 14px;
+  border: 1px solid rgba(188, 220, 255, 0.26) !important;
+  background:
+    radial-gradient(130% 120% at 0% 100%, rgba(77, 216, 255, 0.14), transparent 55%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04)) !important;
+  box-shadow: 0 10px 24px rgba(5, 10, 28, 0.32);
+  display: grid;
+  gap: 0.52rem;
+}
+
+.summary-flat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.summary-flat-head .name {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.voter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.voter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.32rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 208, 255, 0.38);
+  background: rgba(10, 20, 44, 0.48);
+  color: #ebf3ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 .summary-cta {
