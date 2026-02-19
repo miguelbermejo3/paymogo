@@ -27,7 +27,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 if (MAINTENANCE_MODE && !/maintenance\.html$/i.test(window.location.pathname)) {
   const qs = window.location.search || "";

@@ -746,7 +746,9 @@ button:focus-visible,
   color: #ebf3ff;
   font-size: 0.78rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.3;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .summary-cta {
@@ -966,6 +968,50 @@ button:focus-visible,
   color: rgba(222, 232, 255, 0.55);
 }
 
+#bbqTotals {
+  margin-bottom: 0.75rem;
+}
+
+#bbqRequests {
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.bbq-request-card {
+  list-style: none;
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.92rem 0.95rem;
+  border-radius: 16px;
+  border: 1px solid rgba(177, 213, 255, 0.26);
+  background:
+    radial-gradient(120% 120% at 10% 100%, rgba(83, 196, 255, 0.14), transparent 58%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+}
+
+.bbq-request-card .summary-flat-head {
+  align-items: flex-start;
+}
+
+.bbq-request-card .name {
+  font-size: 1.04rem;
+}
+
+.bbq-request-card .voter-row {
+  gap: 0.52rem;
+}
+
+.bbq-request-card .voter-chip {
+  border-color: rgba(148, 204, 255, 0.35);
+  background: rgba(14, 24, 52, 0.56);
+  font-weight: 600;
+}
+
+.bbq-request-card .voter-chip strong {
+  font-weight: 800;
+}
+
 /* Keep form/data blocks left-aligned for readability */
 .bbq-form .card,
 .bbq-form fieldset,
@@ -1002,6 +1048,10 @@ button:focus-visible,
 
 @media (min-width: 768px) {
   .home-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #bbqRequests {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1056,6 +1106,26 @@ button:focus-visible,
   #toast {
     bottom: 0.75rem;
     min-width: min(96vw, 420px);
+  }
+
+  #bbqRequests {
+    gap: 0.85rem;
+  }
+
+  .bbq-request-card {
+    padding: 0.95rem;
+  }
+
+  .bbq-request-card .voter-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .bbq-request-card .voter-chip {
+    width: 100%;
+    font-size: 0.86rem;
+    min-height: 36px;
   }
 }
 
