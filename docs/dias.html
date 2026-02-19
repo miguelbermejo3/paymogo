@@ -2,11 +2,14 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Votación de días</title>
-    <link rel="stylesheet" href="./style.css?v=20260302" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css?v=20260306" />
   </head>
-  <body>
+  <body class="mock-ui">
     <div class="wrap" id="app">
       <header class="hero glass">
         <div class="hero__top">
@@ -17,6 +20,8 @@
         <nav class="nav">
           <a class="nav__link" href="./index.html">Home</a>
           <a class="nav__link" href="./elegir.html">Votación de camas</a>
+          <a class="nav__link" href="./coche.html">Votación de coche</a>
+          <a class="nav__link" href="./tareas.html">Tareas</a>
           <a class="nav__link" href="./resumen.html">Resumen</a>
         </nav>
 
@@ -28,16 +33,14 @@
       </header>
 
       <main class="content">
-        <section class="card glass">
-          <h2>Tu voto de días</h2>
+        <section class="card glass day-vote-shell">
           <p id="myDayVote">Aún no has votado los días.</p>
-        </section>
-
-        <section id="daysOptions" class="grid option-grid" aria-live="polite" aria-busy="false">
-          <article class="card glass">
-            <h3>Cargando opciones...</h3>
-            <p>Un segundo, por favor.</p>
-          </article>
+          <section id="daysOptions" class="grid option-grid" aria-live="polite" aria-busy="false">
+            <article class="card glass">
+              <h3>Cargando opciones...</h3>
+              <p>Un segundo, por favor.</p>
+            </article>
+          </section>
         </section>
       </main>
 
@@ -48,7 +51,7 @@
 
     <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script type="module" src="./app.js?v=20260303"></script>
+    <script type="module" src="./app.js?v=20260306"></script>
   </body>
 </html>
 

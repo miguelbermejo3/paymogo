@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Votación de coche</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css?v=20260306" />
+  </head>
+  <body class="mock-ui">
+    <div class="wrap" id="app">
+      <header class="hero glass">
+        <div class="hero__top">
+          <p class="eyebrow">Transporte al finde</p>
+          <h1>Votación de coche 🚗</h1>
+          <p class="subtitle">Confirma si llevas coche y cuántas plazas puedes ofrecer.</p>
+        </div>
+        <nav class="nav">
+          <a class="nav__link" href="./index.html">Home</a>
+          <a class="nav__link" href="./maleta.html">Mochila</a>
+          <a class="nav__link" href="./tareas.html">Tareas</a>
+          <a class="nav__link" href="./resumen.html">Resumen</a>
+        </nav>
+
+        <div class="hero__meta">
+          <div id="routeContext" class="pill" data-group="">
+            <small>Contexto URL listo para app.js</small>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="card glass">
+          <h2>Tu respuesta</h2>
+          <p id="myCarStatus">Aún no has respondido la votación de coche.</p>
+
+          <form id="carForm" class="bbq-form">
+            <div class="form-grid">
+              <fieldset class="card glass">
+                <legend>¿Llevas coche?</legend>
+                <div class="choice-group">
+                  <label class="choice-option">
+                    <input type="radio" name="hasCar" value="si" />
+                    <span>Sí</span>
+                  </label>
+                  <label class="choice-option">
+                    <input type="radio" name="hasCar" value="no" />
+                    <span>No</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <label class="card glass car-extra-field" hidden>Plazas libres
+                <input id="carSeats" name="seats" type="number" min="0" max="8" class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="Ej: 3" />
+              </label>
+
+              <label class="card glass car-extra-field" hidden>Notas
+                <input id="carNotes" name="carNotes" class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="Ruta, horarios, punto de salida..." />
+              </label>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn--primary" type="submit">Guardar respuesta</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card glass">
+          <h2>Resumen de transporte</h2>
+          <div id="carTotals" class="legend">
+            <span class="badge">0 conductores</span>
+            <span class="badge">0 plazas</span>
+            <span class="badge">0 respuestas</span>
+          </div>
+          <ul id="carVotesList" class="grid"></ul>
+        </section>
+      </main>
+
+      <footer class="footer foot">
+        <p>Cuadrando coches para no ir apretados 😎</p>
+      </footer>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script type="module" src="./app.js?v=20260306"></script>
+  </body>
+</html>

@@ -2,24 +2,29 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Resumen</title>
-    <link rel="stylesheet" href="./style.css?v=20260302" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css?v=20260306" />
   </head>
-  <body>
+  <body class="mock-ui">
     <div class="bg" aria-hidden="true"></div>
     <div class="wrap" id="app">
       <header class="hero glass">
         <div class="hero__top">
           <h1>Resumen general 📊</h1>
-          <p class="subtitle">Camas, días y barbacoa en un solo vistazo.</p>
+          <p class="subtitle">Camas, días, barbacoa, coche y tareas en un solo vistazo.</p>
         </div>
 
         <nav class="nav" aria-label="Navegacion principal">
           <a class="nav__link" href="./index.html">Home</a>
           <a class="nav__link" href="./elegir.html">Elegir cama</a>
           <a class="nav__link" href="./dias.html">Votación días</a>
+          <a class="nav__link" href="./coche.html">Coche</a>
           <a class="nav__link" href="./barbacoa.html">Barbacoa</a>
+          <a class="nav__link" href="./tareas.html">Tareas</a>
         </nav>
 
         <div id="stats" class="stats">
@@ -29,11 +34,62 @@
       </header>
 
       <main id="summary" class="content fade-in">
-        <section class="card glass" aria-label="Mi cama">
-          <h2>Mi cama</h2>
-          <p id="myVote">Aun no has votado.</p>
+        <section id="orden-asignacion" class="card glass" aria-label="Orden de asignación">
+          <h2>Orden de asignación</h2>
+          <p class="meta">Top → bottom según el orden aplicado por el asignador.</p>
+          <ul id="assignmentOrderList" class="assignment-order-list" aria-live="polite">
+            <li class="meta">Calculando orden...</li>
+          </ul>
+        </section>
+
+        <section class="card glass summary-dashboard" aria-label="Panel visual">
+          <h2>Panel visual</h2>
+          <p class="meta">Vista rápida de camas, días, barbacoa, coche, tareas y posiciones.</p>
+          <div class="charts-grid">
+            <article class="chart-card">
+              <h3>Votos por cama</h3>
+              <div id="chartBedsPie" class="donut-block" aria-live="polite">
+                <p class="meta">Cargando gráfico...</p>
+              </div>
+            </article>
+            <article class="chart-card">
+              <h3>Votos por día</h3>
+              <div id="chartDaysPie" class="donut-block" aria-live="polite">
+                <p class="meta">Cargando gráfico...</p>
+              </div>
+            </article>
+            <article class="chart-card">
+              <h3>Barbacoa</h3>
+              <div id="chartBbqPie" class="donut-block" aria-live="polite">
+                <p class="meta">Cargando gráfico...</p>
+              </div>
+            </article>
+            <article class="chart-card">
+              <h3>Coche</h3>
+              <div id="chartCarsPie" class="donut-block" aria-live="polite">
+                <p class="meta">Cargando gráfico...</p>
+              </div>
+            </article>
+            <article class="chart-card">
+              <h3>Tareas</h3>
+              <div id="chartTasksPie" class="donut-block" aria-live="polite">
+                <p class="meta">Cargando gráfico...</p>
+              </div>
+            </article>
+            <article class="chart-card">
+              <h3>Ranking</h3>
+              <ol id="chartRanking" class="chart-list chart-list--ranking chart-list--compact" aria-live="polite">
+                <li class="meta">Cargando ranking...</li>
+              </ol>
+            </article>
+          </div>
+        </section>
+
+        <section class="card glass" aria-label="Mi asignación de cama">
+          <h2>Mi asignación</h2>
+          <p id="myVote">Aún no has enviado tus preferencias.</p>
           <div class="modal__actions">
-            <a id="goChooseBtn" class="btn" href="./elegir.html">Ir a elegir</a>
+            <a id="goChooseBtn" class="btn" href="./elegir.html">Elegir preferencias</a>
             <button id="adminResetBtn" class="ghost hidden" type="button">Reset</button>
           </div>
         </section>
@@ -84,7 +140,7 @@
     <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script type="module" src="./app.js?v=20260303"></script>
+    <script type="module" src="./app.js?v=20260306"></script>
   </body>
 </html>
 

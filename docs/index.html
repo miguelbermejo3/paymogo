@@ -2,69 +2,106 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>PAYMOGO</title>
-    <link rel="stylesheet" href="./style.css?v=20260302" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css?v=20260306" />
   </head>
-  <body>
-    <div class="wrap" id="app">
-      <header class="hero glass">
-        <div class="hero__top">
-          <p class="eyebrow">Bienvenidos a PAYMOGO</p>
-          <h1>Casa del Campo 🏡</h1>
-          <p class="subtitle">Elige tu cama, vota y haz que todo vaya como la megafire…
-¡que esto no sea una tómbola de pueblo sino la ruleta del finde girando fino! 🎰🔥
-
-Nada de dejarlo al azar como en el Ruleta del casino — aquí se vota TODO en la web: cama, planes, horarios y hasta quién lleva el hielo 🧊😂
-
-Que luego llegan los “yo pensaba que…” y eso sí que es apostar al rojo sin mirar.
-
-Vota ahora y que el finde salga 10/10, bien organizado y sin dramas. 🎉</p>
-        </div>
-
-        <nav class="nav">
-          <a class="nav__link" href="./index.html" aria-current="page">Home</a>
-          <a class="nav__link" href="./elegir.html">Elegir cama</a>
-          <a class="nav__link" href="./resumen.html">Resumen</a>
-        </nav>
-
-        <div class="hero__meta">
-          <div class="pill" id="stats">
-            <strong>Total plazas: 15</strong>
-            <span>4 matrimonios = 8, colchón 2p = 2, 5 individuales = 5</span>
-          </div>
-          <div id="routeContext" class="route-context" data-group="">
-            <small>Contexto URL listo para app.js (ej: ?group=casaCampo)</small>
-          </div>
-        </div>
+  <body class="mock-ui home-page">
+    <div class="wrap home-shell" id="app">
+      <header class="home-hero">
+        <div class="home-hero__sun" aria-hidden="true"></div>
+        <div class="home-hero__orb" aria-hidden="true"></div>
+        <p class="home-hero__eyebrow">📍 PAYMOGO, HUELVA</p>
+        <h1>Finde en Paymogo 🎉</h1>
+        <p>Vota y organiza el planazo del fin de semana</p>
       </header>
 
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="nav__link" href="./index.html" aria-current="page">Inicio</a>
+        <a class="nav__link" href="./elegir.html">Cama</a>
+        <a class="nav__link" href="./coche.html">Coche</a>
+        <a class="nav__link" href="./tareas.html">Tareas</a>
+        <a class="nav__link" href="./resumen.html">Resultados</a>
+      </nav>
+
+      <div class="home-meta">
+        <div class="pill" id="stats">
+          <strong>Plazas libres: --/--</strong>
+          <span>Cargando ocupación...</span>
+        </div>
+        <div id="routeContext" class="route-context" data-group="">
+          <small>Contexto URL listo para app.js</small>
+        </div>
+      </div>
+
       <main class="content">
+        <section class="home-copy">
+          <h2>Vota en cada sección</h2>
+          <p>Haz clic en cada tarjeta lelo</p>
+        </section>
+
         <section class="grid home-menu" id="bedsPreview" data-static="true" aria-label="Tipos de votación">
-          <a class="card glass menu-card" href="./elegir.html">
-            <h2>Votación de camas</h2>
-            <p>Elige dónde te gustaría dormir, si quieres más información lee las descripciones con cuidado...</p>
-            <span class="chip">Disponible</span>
+          <a class="home-menu-card home-menu-card--violet" href="./elegir.html">
+            <span class="home-menu-card__icon">🛏️</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Preferencia de Cama</h3>
+            <p>Elige dónde quieres dormir</p>
           </a>
 
-          <a class="card glass menu-card" href="./dias.html">
-            <h2>Votación de días</h2>
-            <p>Decidid qué días va cada uno para cuadrar el plan.</p>
-            <span class="chip">Disponible</span>
+          <a class="home-menu-card home-menu-card--green" href="./dias.html">
+            <span class="home-menu-card__icon">🗓️</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Días de Asistencia</h3>
+            <p>Cuéntanos qué días vienes</p>
           </a>
 
-          <a class="card glass menu-card" href="./barbacoa.html">
-            <h2>Barbacoa del sábado</h2>
-            <p>Confirma si vienes, si contamos contigo para comida/bebida y tus peticiones.</p>
-            <span class="chip">Disponible</span>
+          <a class="home-menu-card home-menu-card--rose" href="./barbacoa.html">
+            <span class="home-menu-card__icon">🔥</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Barbacoa del Sábado</h3>
+            <p>¿Vienes a la barbacoa?</p>
           </a>
 
-          <a class="card glass menu-card" href="./maleta.html">
-            <h2>Maleta comunitaria</h2>
-            <p>Añadid recordatorios de cosas para llevar y asignad responsable.</p>
-            <span class="chip">Disponible</span>
+          <a class="home-menu-card home-menu-card--sky" href="./maleta.html">
+            <span class="home-menu-card__icon">🎒</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Mochila compartida</h3>
+            <p>Organizad qué lleva cada persona</p>
+          </a>
+
+          <a class="home-menu-card home-menu-card--car" href="./coche.html">
+            <span class="home-menu-card__icon">🚗</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Votación de coche</h3>
+            <p>¿Llevas coche y cuántas plazas?</p>
+          </a>
+
+          <a class="home-menu-card home-menu-card--green" href="./tareas.html">
+            <span class="home-menu-card__icon">✅</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Asignador de tareas</h3>
+            <p>Crea tareas y responde sí o no</p>
+          </a>
+
+          <a class="home-menu-card home-menu-card--violet" href="./resumen.html">
+            <span class="home-menu-card__icon">📊</span>
+            <span class="home-menu-card__arrow" aria-hidden="true">→</span>
+            <h3>Resumen general</h3>
+            <p>Consulta resultados y gráficos</p>
           </a>
         </section>
+
+        <a id="ctaVote" class="home-results" href="./resumen.html">
+          <span class="home-results__icon">📊</span>
+          <span class="home-results__body">
+            <strong>Ver Resultados</strong>
+            <small>Consulta todas las votaciones</small>
+          </span>
+          <span class="home-results__arrow" aria-hidden="true">→</span>
+        </a>
 
         <section class="card glass" id="brotherLeaderboard" aria-label="Clasificación de hermano">
           <h2>Clasificación de hermano 🏆</h2>
@@ -91,10 +128,6 @@ Vota ahora y que el finde salga 10/10, bien organizado y sin dramas. 🎉</p>
           </ul>
         </section>
       </main>
-
-      <footer class="footer foot">
-        <p>Realizado de mi para ti </p>
-      </footer>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -114,16 +147,34 @@ Vota ahora y que el finde salga 10/10, bien organizado y sin dramas. 🎉</p>
       </div>
     </div>
 
+    <div id="scoreInfoModal" class="modal score-info-modal" role="dialog" aria-modal="true" aria-labelledby="scoreInfoTitle" aria-hidden="true">
+      <div class="modal__backdrop" data-close-score-info="true"></div>
+      <div class="modal__panel glass">
+        <h3 id="scoreInfoTitle">Cómo funciona la asignación de camas</h3>
+        <div class="modal__content">
+          <p><strong>1)</strong> Cada persona elige 3 camas por orden (1ª, 2ª, 3ª).</p>
+          <p><strong>2)</strong> Se calcula un ranking de puntos.</p>
+          <p><strong>3)</strong> Se asigna cama de mayor a menor ranking, intentando 1ª → 2ª → 3ª.</p>
+          <p><strong>Puntuación actual:</strong></p>
+          <p>• Días: +1 por día (viernes+sábado o 3 días = +3).</p>
+          <p>• Barbacoa: +1 asiste, +1 comida, +1 bebida.</p>
+          <p>• Maleta: +1 al que lo lleva, +0.5 al que lo crea.</p>
+          <p>• Coche: +1 por llevar coche, +0.25 por pasajero.</p>
+          <p>• Tareas: +1 crear tarea, +0.5 por cada Sí votado, +0.1 al creador por cada Sí recibido.</p>
+          <p>• Penalización tareas: -0.5 si hay tareas y no votas ninguna o no tienes ningún Sí.</p>
+          <p>• Bonus global: +0.5 si participas en días + coche + tareas + maleta.</p>
+        </div>
+        <div class="modal__actions">
+          <button class="btn btn--primary" type="button" data-close-score-info="true">Comprendido</button>
+          <button class="btn ghost" type="button" data-close-score-info="true">No he entendido nada pero voto</button>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script type="module" src="./app.js?v=20260303"></script>
+    <script type="module" src="./app.js?v=20260306"></script>
   </body>
 </html>
-
-
-
-
-
-
 
 
 

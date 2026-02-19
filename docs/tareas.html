@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Maleta comunitaria</title>
+    <title>Asignador de tareas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
@@ -14,17 +14,14 @@
       <header class="hero glass">
         <div class="hero__top">
           <p class="eyebrow">Organización del finde</p>
-          <h1>Maleta comunitaria 🎒</h1>
-          <p class="subtitle">Añade cosas para llevar y asigna quién las trae.</p>
+          <h1>Asignador de tareas ✅</h1>
+          <p class="subtitle">Crea tareas con fecha y que cada persona responda si ayuda o no.</p>
         </div>
 
         <nav class="nav">
           <a class="nav__link" href="./index.html">Home</a>
-          <a class="nav__link" href="./elegir.html">Camas</a>
-          <a class="nav__link" href="./dias.html">Días</a>
-          <a class="nav__link" href="./barbacoa.html">Barbacoa</a>
+          <a class="nav__link" href="./maleta.html">Mochila</a>
           <a class="nav__link" href="./coche.html">Coche</a>
-          <a class="nav__link" href="./tareas.html">Tareas</a>
           <a class="nav__link" href="./resumen.html">Resumen</a>
         </nav>
 
@@ -37,37 +34,43 @@
 
       <main class="content">
         <section class="card glass">
-          <h2>Añadir recordatorio</h2>
-          <form id="packingForm" class="bbq-form">
+          <h2>Nueva tarea</h2>
+          <form id="taskForm" class="bbq-form">
             <div class="form-grid">
-              <label class="card glass">Qué hay que llevar
-                <input id="packingItemName" name="itemName" class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="Ej: balón de fútbol" required />
+              <label class="card glass">Título
+                <input name="taskTitle" class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="Ej: Ayudar con la compra" required />
               </label>
 
-              <label class="card glass">¿Quién lo lleva?
-                <select id="packingAssignedUser" name="assignedUserId" class="btn ghost" style="width:100%;justify-content:flex-start;"></select>
+              <label class="card glass">Fecha
+                <input name="taskDate" type="date" class="btn ghost" style="width:100%;justify-content:flex-start;" required />
               </label>
 
-              <label class="card glass">Notas
-                <input id="packingNotes" name="notes" class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="Ej: inflado y con bomba" />
+              <label class="card glass">Detalle (opcional)
+                <input name="taskNotes" class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="Ej: Carrefour a las 11:30" />
               </label>
             </div>
+
             <div class="actions">
-              <button type="submit" class="btn btn--primary">Añadir a maleta</button>
+              <button class="btn btn--primary" type="submit">Crear tarea</button>
             </div>
           </form>
         </section>
 
         <section class="card glass">
-          <h2>Lista compartida</h2>
-          <ul id="packingList" class="grid">
-            <li class="meta">Cargando lista...</li>
+          <h2>Tareas del grupo</h2>
+          <div id="taskTotals" class="legend">
+            <span class="badge">0 tareas</span>
+            <span class="badge">0 sí</span>
+            <span class="badge">0 no</span>
+          </div>
+          <ul id="taskList" class="grid">
+            <li class="meta">Cargando tareas...</li>
           </ul>
         </section>
       </main>
 
       <footer class="footer foot">
-        <p>Todo bajo control, o al menos eso intentamos 😅</p>
+        <p>Primero versión base. Luego la pulimos a tu gusto.</p>
       </footer>
     </div>
 
@@ -76,12 +79,3 @@
     <script type="module" src="./app.js?v=20260306"></script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-

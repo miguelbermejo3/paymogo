@@ -2,22 +2,27 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Elegir cama</title>
-    <link rel="stylesheet" href="./style.css?v=20260302" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css?v=20260306" />
   </head>
-  <body>
+  <body class="mock-ui">
     <div class="bg" aria-hidden="true"></div>
     <div class="wrap" id="app">
       <header class="hero glass">
         <div class="hero__top">
           <a class="btn ghost" href="./index.html">Volver a Home</a>
-          <h1>Elige tu cama 🛏️</h1>
-          <p class="subtitle">Cada persona 1 voto. Gracias maricas.</p>
+          <h1>Preferencias de cama 🛏️</h1>
+          <p class="subtitle">Elige 3 opciones por orden de preferencia.</p>
         </div>
 
         <nav class="nav" aria-label="Navegacion principal">
           <a class="nav__link" href="./index.html">Home</a>
+          <a class="nav__link" href="./coche.html">Coche</a>
+          <a class="nav__link" href="./tareas.html">Tareas</a>
           <a class="nav__link" href="./resumen.html">Resumen</a>
         </nav>
 
@@ -34,12 +39,15 @@
 
       <main class="content">
         <section class="card glass fade-in" aria-label="Tips para votar">
-          <h2>Tips para sobrevivir a la asignacion</h2>
+          <h2>Cómo funciona la asignación</h2>
           <ul>
-            <li>Si ves una cama libre, no pestañees: desaparece rapido.</li>
-            <li>Recuerda: matrimonio ocupa 2 plazas, intenta escoger la menos indicada.</li>
-            <li>Vota con cabeza fria, que luego vienen los ronquidos.</li>
+            <li>Marca 3 camas en orden: 1ª, 2ª y 3ª preferencia.</li>
+            <li>La asignación se hace por ranking de hermano, de mayor a menor.</li>
+            <li>Si una opción está llena, se intenta la siguiente automáticamente.</li>
           </ul>
+          <div class="actions">
+            <button id="showBedLayoutBtn" class="btn ghost" type="button">Mostrar distribución de camas</button>
+          </div>
         </section>
 
         <section id="bedsGrid" class="grid" aria-live="polite" aria-busy="false">
@@ -50,7 +58,7 @@
         </section>
 
         <div class="actions">
-          <button id="myVoteBtn" class="btn" type="button" disabled>Ver mi voto</button>
+          <button id="myVoteBtn" class="btn" type="button" disabled>Ver mis preferencias</button>
         </div>
       </main>
 
@@ -65,8 +73,8 @@
       <div class="modal__backdrop" data-close-modal="true"></div>
       <div class="modal__panel glass">
         <button class="modal__close" type="button" aria-label="Cerrar" data-close-modal="true">×</button>
-        <h3 id="myVoteTitle">Mi voto</h3>
-        <p id="myVoteText">Aun no has votado.</p>
+        <h3 id="myVoteTitle">Mis preferencias</h3>
+        <p id="myVoteText">Aún no has elegido preferencias.</p>
         <div class="modal__actions">
           <button class="btn ghost" type="button" data-close-modal="true">Cerrar</button>
           <a id="goSummaryBtn" class="btn" href="./resumen.html">Ver resumen</a>
@@ -89,10 +97,94 @@
       </div>
     </div>
 
-    <audio id="clickSound" src="./assets/sounds/click.mp3" preload="auto"></audio>
+    <div id="bedLayoutModal" class="modal bed-layout-modal" role="dialog" aria-modal="true" aria-labelledby="bedLayoutTitle" aria-hidden="true">
+      <div class="modal__backdrop" data-close-bed-layout="true"></div>
+      <div class="modal__panel glass">
+        <button class="modal__close" type="button" aria-label="Cerrar" data-close-bed-layout="true">×</button>
+        <h3 id="bedLayoutTitle">Distribución de camas</h3>
+        <p class="meta">Plano arquitectónico simplificado con la distribución actual.</p>
+
+        <div class="bed-blueprint">
+          <article class="blueprint-floor">
+            <h4>Planta baja</h4>
+            <svg viewBox="0 0 520 290" class="blueprint-svg" role="img" aria-label="Plano de planta baja">
+              <rect x="8" y="8" width="504" height="274" class="bp-shell" />
+              <line x1="262" y1="8" x2="262" y2="282" class="bp-wall" />
+
+              <text x="26" y="34" class="bp-room-title">Habitación 1</text>
+              <rect x="72" y="96" width="120" height="58" class="bp-bed-ind" />
+              <text x="86" y="131" class="bp-bed-label">Individual 1</text>
+              <rect x="12" y="102" width="12" height="48" class="bp-window" />
+              <text x="30" y="130" class="bp-window-label">Ventana</text>
+
+              <text x="286" y="34" class="bp-room-title">Habitación 2</text>
+              <rect x="286" y="54" width="178" height="72" class="bp-bed-mat" />
+              <text x="298" y="96" class="bp-bed-label">Matrimonio 1</text>
+              <rect x="286" y="144" width="178" height="52" class="bp-bed-colchon" />
+              <text x="300" y="175" class="bp-bed-label">Colchón 1</text>
+              <rect x="496" y="102" width="12" height="48" class="bp-window" />
+              <text x="420" y="130" class="bp-window-label">Ventana</text>
+            </svg>
+          </article>
+
+          <article class="blueprint-floor">
+            <h4>Planta alta</h4>
+            <svg viewBox="0 0 520 360" class="blueprint-svg" role="img" aria-label="Plano de planta alta">
+              <rect x="8" y="8" width="504" height="344" class="bp-shell" />
+
+              <line x1="8" y1="124" x2="512" y2="124" class="bp-wall" />
+              <line x1="338" y1="124" x2="338" y2="352" class="bp-wall" />
+              <line x1="8" y1="234" x2="338" y2="234" class="bp-wall" />
+
+              <text x="26" y="36" class="bp-room-title">Habitación 5 (enfrente escaleras)</text>
+              <rect x="28" y="50" width="170" height="44" class="bp-bed-mat" />
+              <text x="40" y="78" class="bp-bed-label">Matrimonio 2</text>
+              <rect x="214" y="50" width="120" height="44" class="bp-bed-ind" />
+              <text x="224" y="78" class="bp-bed-label">Individual 2</text>
+              <rect x="438" y="58" width="54" height="14" class="bp-window-int" />
+              <text x="374" y="90" class="bp-window-label">Ventana a terraza</text>
+
+              <text x="26" y="154" class="bp-room-title">Habitación 3 (izquierda)</text>
+              <rect x="24" y="166" width="168" height="44" class="bp-bed-mat" />
+              <text x="36" y="194" class="bp-bed-label">Matrimonio 3</text>
+              <rect x="206" y="166" width="114" height="44" class="bp-bed-ind" />
+              <text x="216" y="194" class="bp-bed-label">Individual 3</text>
+              <rect x="12" y="168" width="12" height="40" class="bp-window" />
+              <text x="30" y="222" class="bp-window-label">Ventana</text>
+
+              <text x="26" y="262" class="bp-room-title">Habitación 4 (izquierda)</text>
+              <rect x="24" y="274" width="168" height="38" class="bp-bed-mat" />
+              <text x="36" y="299" class="bp-bed-label">Matrimonio 4</text>
+              <rect x="24" y="316" width="120" height="28" class="bp-bed-ind" />
+              <text x="34" y="334" class="bp-bed-label">Individual 4</text>
+              <rect x="12" y="286" width="12" height="40" class="bp-window" />
+              <text x="30" y="347" class="bp-window-label">Ventana</text>
+
+              <rect x="346" y="136" width="156" height="126" class="bp-bath" />
+              <text x="392" y="168" class="bp-room-title">Baño</text>
+              <text x="366" y="194" class="bp-bed-label">Derecha al subir</text>
+
+              <rect x="236" y="254" width="92" height="88" class="bp-stairs" />
+              <text x="246" y="302" class="bp-bed-label">Escaleras</text>
+            </svg>
+          </article>
+        </div>
+
+        <div class="blueprint-legend">
+          <span class="chip chip-mat">Matrimonio</span>
+          <span class="chip chip-ind">Individual</span>
+          <span class="chip chip-col">Colchón</span>
+          <span class="chip chip-win">Ventana</span>
+        </div>
+
+        <div class="modal__actions">
+          <button class="btn btn--primary" type="button" data-close-bed-layout="true">Cerrar plano</button>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script type="module" src="./app.js?v=20260303"></script>
+    <script type="module" src="./app.js?v=20260306"></script>
   </body>
 </html>
 

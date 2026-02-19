@@ -81,16 +81,49 @@ service cloud.firestore {
         !exists(/databases/$(database)/documents/dayVotes/$(userId)) &&
         request.resource.data.uid == request.auth.uid &&
         request.resource.data.userId == userId &&
-        request.resource.data.optionId in ["viernes", "sabado", "viernes_sabado"] &&
+        request.resource.data.optionId is string &&
+        request.resource.data.optionId.size() > 0 &&
         request.resource.data.optionLabel is string &&
         request.resource.data.optionLabel.size() > 0 &&
+        request.resource.data.selectedDayIds is list &&
+        request.resource.data.selectedDayIds.size() >= 1 &&
+        request.resource.data.selectedDayIds.size() <= 3 &&
+        request.resource.data.selectedDayIds.hasOnly(["viernes", "sabado", "domingo"]) &&
         request.resource.data.keys().hasOnly([
           "uid",
           "userId",
           "userName",
           "optionId",
           "optionLabel",
+          "selectedDayIds",
           "createdAt",
+          "group",
+        ]);
+    }
+
+    match /bedPreferences/{userId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create, update: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.userId == userId &&
+        request.resource.data.userName is string &&
+        request.resource.data.topChoices is list &&
+        request.resource.data.topChoices.size() == 3 &&
+        request.resource.data.topChoices[0] is string &&
+        request.resource.data.topChoices[1] is string &&
+        request.resource.data.topChoices[2] is string &&
+        request.resource.data.topChoices[0] != request.resource.data.topChoices[1] &&
+        request.resource.data.topChoices[0] != request.resource.data.topChoices[2] &&
+        request.resource.data.topChoices[1] != request.resource.data.topChoices[2] &&
+        request.resource.data.keys().hasOnly([
+          "uid",
+          "userId",
+          "userName",
+          "topChoices",
+          "createdAt",
+          "updatedAt",
           "group",
         ]);
     }
@@ -127,6 +160,52 @@ service cloud.firestore {
         ]);
     }
 
+    match /carVotes/{userId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create, update: if isSignedIn() &&
+        request.auth.uid == request.resource.data.uid &&
+        request.resource.data.userId == userId &&
+        request.resource.data.userName is string &&
+        request.resource.data.hasCar is bool &&
+        request.resource.data.seats is int &&
+        request.resource.data.seats >= 0 &&
+        request.resource.data.seats <= 8 &&
+        request.resource.data.notes is string &&
+        request.resource.data.keys().hasOnly([
+          "uid",
+          "userId",
+          "userName",
+          "hasCar",
+          "seats",
+          "notes",
+          "createdAt",
+          "updatedAt",
+          "group",
+        ]);
+    }
+
+    match /carJoins/{userId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create, update: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.userId == userId &&
+        request.resource.data.userName is string &&
+        request.resource.data.driverUserId is string &&
+        request.resource.data.keys().hasOnly([
+          "uid",
+          "userId",
+          "userName",
+          "driverUserId",
+          "createdAt",
+          "updatedAt",
+          "group",
+        ]);
+    }
+
     match /packingItems/{itemId} {
       allow read: if isSignedIn();
       allow delete: if false;
@@ -157,6 +236,81 @@ service cloud.firestore {
       allow update: if isSignedIn() &&
         request.resource.data.diff(resource.data).changedKeys().hasOnly(["status", "updatedAt"]) &&
         request.resource.data.status in ["pendiente", "listo"];
+    }
+
+    match /packingVotes/{voteId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create, update: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.userId is string &&
+        request.resource.data.userId.size() > 0 &&
+        request.resource.data.userName is string &&
+        request.resource.data.itemId is string &&
+        request.resource.data.itemId.size() > 0 &&
+        request.resource.data.vote in [-1, 1] &&
+        request.resource.data.keys().hasOnly([
+          "itemId",
+          "userId",
+          "userName",
+          "uid",
+          "vote",
+          "createdAt",
+          "updatedAt",
+          "group",
+        ]);
+    }
+
+    match /taskItems/{taskId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create: if isSignedIn() &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.dueDate is string &&
+        request.resource.data.dueDate.size() > 0 &&
+        request.resource.data.notes is string &&
+        request.resource.data.createdByUserId is string &&
+        request.resource.data.createdByUserId.size() > 0 &&
+        request.resource.data.createdByUserName is string &&
+        request.resource.data.keys().hasOnly([
+          "title",
+          "dueDate",
+          "notes",
+          "createdByUserId",
+          "createdByUserName",
+          "createdAt",
+          "updatedAt",
+          "group",
+        ]);
+
+      allow update: if false;
+    }
+
+    match /taskVotes/{voteId} {
+      allow read: if isSignedIn();
+      allow delete: if false;
+
+      allow create, update: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.taskId is string &&
+        request.resource.data.taskId.size() > 0 &&
+        request.resource.data.userId is string &&
+        request.resource.data.userId.size() > 0 &&
+        request.resource.data.userName is string &&
+        request.resource.data.vote in [-1, 1] &&
+        request.resource.data.keys().hasOnly([
+          "taskId",
+          "userId",
+          "userName",
+          "uid",
+          "vote",
+          "createdAt",
+          "updatedAt",
+          "group",
+        ]);
     }
   }
 }
