@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Página en mantenimiento</title>
+    <style>
+      :root {
+        --bg0: #0a1024;
+        --bg1: #121b3d;
+        --txt: #ecf2ff;
+        --muted: #b8c4ea;
+        --stroke: rgba(255, 255, 255, 0.22);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+      }
+
+      body {
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        color: var(--txt);
+        background:
+          radial-gradient(900px 600px at 12% -10%, #294f9b 0%, transparent 56%),
+          radial-gradient(700px 520px at 88% 18%, #5b2f93 0%, transparent 55%),
+          linear-gradient(145deg, var(--bg0), var(--bg1));
+      }
+
+      .panel {
+        width: min(700px, 100%);
+        border: 1px solid var(--stroke);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.09);
+        padding: clamp(1rem, 2vw, 2rem);
+        text-align: center;
+        box-shadow: 0 18px 40px rgba(4, 8, 24, 0.45);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.5rem);
+        line-height: 1.08;
+      }
+
+      p {
+        margin: 0.8rem 0 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 0.95rem + 0.35vw, 1.15rem);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="panel" role="main" aria-live="polite">
+      <h1>Página en mantenimiento</h1>
+      <p>Por favor, espere un poco más pesao.</p>
+      <p>El admin le avisará cuando tenga más de 5 minutos libres.</p>
+    </main>
+  </body>
+</html>
