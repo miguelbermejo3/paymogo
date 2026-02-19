@@ -1096,13 +1096,19 @@ function renderBbqPage() {
     } else {
       withData.forEach((v) => {
         const li = document.createElement("li");
-        li.className = "summary-row";
+        li.className = "bbq-request-card";
+        const detailChips = [
+          v.peticionComida ? `<span class="voter-chip"><strong>Comida:</strong> ${escapeHtml(v.peticionComida)}</span>` : "",
+          v.peticionBebida ? `<span class="voter-chip"><strong>Bebida:</strong> ${escapeHtml(v.peticionBebida)}</span>` : "",
+          v.noQuiere ? `<span class="voter-chip"><strong>No quiere:</strong> ${escapeHtml(v.noQuiere)}</span>` : "",
+          v.notas ? `<span class="voter-chip"><strong>Notas:</strong> ${escapeHtml(v.notas)}</span>` : "",
+        ].filter(Boolean).join("");
         li.innerHTML = `
-          <span class="name">${escapeHtml(v.userName)}</span>
-          ${v.peticionComida ? `<span class="meta">Comida: ${escapeHtml(v.peticionComida)}</span>` : ""}
-          ${v.peticionBebida ? `<span class="meta">Bebida: ${escapeHtml(v.peticionBebida)}</span>` : ""}
-          ${v.noQuiere ? `<span class="meta">No quiere: ${escapeHtml(v.noQuiere)}</span>` : ""}
-          ${v.notas ? `<span class="meta">Notas: ${escapeHtml(v.notas)}</span>` : ""}
+          <div class="summary-flat-head">
+            <span class="name">${escapeHtml(v.userName)}</span>
+            <span class="${v.asiste ? "badge" : "sold"}">${v.asiste ? "ASISTE" : "NO ASISTE"}</span>
+          </div>
+          <div class="voter-row">${detailChips}</div>
         `;
         requestList.appendChild(li);
       });
@@ -1556,8 +1562,11 @@ async function bootstrap() {
 
   try {
     await ensureAuth();
+    // Identity must stay interactive (PIN modal/buttons), so do not keep global loading lock here.
+    setLoading(false);
     await ensureIdentity();
     ensureLogoutButton();
+    setLoading(true);
     await refreshData();
     renderCurrentPage();
     wireChooseEvents();
