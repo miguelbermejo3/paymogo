@@ -333,6 +333,40 @@ function clearCurrentUser() {
   } catch (_) {}
 }
 
+function ensureLogoutButton() {
+  const nav = qs(".nav");
+  if (!nav) return;
+
+  let btn = qs("#logoutBtn", nav);
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "logoutBtn";
+    btn.type = "button";
+    btn.className = "nav__link";
+    nav.appendChild(btn);
+
+    on(btn, "click", async () => {
+      tapFx();
+      clearCurrentUser();
+      state.myVote = null;
+      state.myDayVote = null;
+      state.myBbqVote = null;
+      toast("Sesión cerrada. Elige usuario para continuar.", "info", 3200);
+
+      try {
+        await ensureIdentity();
+        await refreshData();
+        renderCurrentPage();
+      } catch (err) {
+        toast(`No se pudo reabrir sesión: ${parseError(err)}`, "error", 3800);
+        console.error("Relogin error", err);
+      }
+    });
+  }
+
+  btn.textContent = state.userName ? `Cerrar sesión (${state.userName})` : "Cerrar sesión";
+}
+
 async function fetchUsers() {
   try {
     const snap = await getDocs(collection(db, "users"));
@@ -1511,6 +1545,7 @@ async function bootstrap() {
   try {
     await ensureAuth();
     await ensureIdentity();
+    ensureLogoutButton();
     await refreshData();
     renderCurrentPage();
     wireChooseEvents();
