@@ -375,7 +375,7 @@ function ensureIdentityModal() {
       <label class="meta" for="identityUserSelect">Usuario</label>
       <select id="identityUserSelect" class="btn ghost" style="width:100%;justify-content:flex-start;"></select>
       <label class="meta" for="identityPinInput">PIN</label>
-      <input id="identityPinInput" type="password" inputmode="numeric" autocomplete="one-time-code"
+      <input id="identityPinInput" type="password" autocomplete="current-password"
         class="btn ghost" style="width:100%;justify-content:flex-start;" placeholder="PIN" />
       <div class="modal__actions">
         <button id="identitySubmitBtn" class="btn btn--primary" type="button">Entrar</button>
