@@ -3,6 +3,8 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
 import {
   getFirestore,
   collection,
+  query,
+  where,
   getDocs,
   doc,
   getDoc,
@@ -64,6 +66,11 @@ const DAY_OPTIONS = [
   { id: "sabado", label: "Sábado", subtitle: "Solo sábado" },
   { id: "viernes_sabado", label: "Viernes y Sábado", subtitle: "Plan completo" },
 ];
+
+function groupAwareCollectionRef(collectionName) {
+  const col = collection(db, collectionName);
+  return state.group ? query(col, where("group", "==", state.group)) : col;
+}
 
 function computeBrotherRanking() {
   const baseUsers = (state.users || []).map((u) => ({
@@ -473,7 +480,7 @@ async function ensureIdentity() {
 
 async function fetchBeds() {
   try {
-    const snap = await getDocs(collection(db, "beds"));
+    const snap = await getDocs(groupAwareCollectionRef("beds"));
     const rows = snap.docs.map((d) => normalizeBed(d.id, d.data()));
     return sortBeds(rows);
   } catch (err) {
@@ -498,7 +505,7 @@ async function fetchMyVote() {
 
 async function fetchAllUserVotes() {
   try {
-    const snap = await getDocs(collection(db, "userVotes"));
+    const snap = await getDocs(groupAwareCollectionRef("userVotes"));
     return snap.docs.map((d) => {
       const data = d.data() || {};
       return {
@@ -530,7 +537,7 @@ async function fetchMyDayVote() {
 
 async function fetchAllDayVotes() {
   try {
-    const snap = await getDocs(collection(db, "dayVotes"));
+    const snap = await getDocs(groupAwareCollectionRef("dayVotes"));
     return snap.docs.map((d) => {
       const data = d.data() || {};
       return {
@@ -563,7 +570,7 @@ async function fetchMyBbqVote() {
 
 async function fetchAllBbqVotes() {
   try {
-    const snap = await getDocs(collection(db, "bbqVotes"));
+    const snap = await getDocs(groupAwareCollectionRef("bbqVotes"));
     return snap.docs.map((d) => {
       const data = d.data() || {};
       return {
@@ -588,7 +595,7 @@ async function fetchAllBbqVotes() {
 
 async function fetchPackingItems() {
   try {
-    const snap = await getDocs(collection(db, "packingItems"));
+    const snap = await getDocs(groupAwareCollectionRef("packingItems"));
     return snap.docs
       .map((d) => {
         const data = d.data() || {};

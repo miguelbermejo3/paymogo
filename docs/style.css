@@ -590,7 +590,14 @@ button[disabled],
 
 body.loading .wrap {
   opacity: 0.72;
+  pointer-events: auto;
+}
+
+body.loading button,
+body.loading a,
+body.loading [role="button"] {
   pointer-events: none;
+  cursor: progress;
 }
 
 body.loading::after {
@@ -1022,6 +1029,25 @@ button:focus-visible,
   }
 }
 
+@media (max-width: 900px) {
+  .glass,
+  .card,
+  .hero,
+  .pill,
+  .modal__panel,
+  #stats,
+  .stats {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .blob {
+    filter: blur(22px);
+    animation: none !important;
+  }
+}
+
 @media (min-width: 768px) {
   .home-menu {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1172,6 +1198,10 @@ button:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .blob {
+    animation: none !important;
   }
 }
 
